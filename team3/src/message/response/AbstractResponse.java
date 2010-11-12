@@ -24,5 +24,4 @@ public abstract class AbstractResponse implements IMessage {
 		return null;
 	}
 
-	public static AbstractResponse
 }
