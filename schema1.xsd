@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:element name="AbstractClientMessage" type="abstractClientMessage" />
+
+	<xs:element name="ErrorMessage" type="errorMessage" />
+
+	<xs:element name="FileGetMessage" type="fileGetMessage" />
+
+	<xs:element name="FilePutMessage" type="filePutMessage" />
+
+	<xs:element name="SimpleMessage" type="simpleMessage" />
+
+	<xs:complexType name="simpleMessage">
+		<xs:complexContent>
+			<xs:extension base="abstractClientMessage">
+				<xs:sequence>
+					<xs:element name="start" type="xs:int" />
+					<xs:element name="numFiles" type="xs:int" />
+				</xs:sequence>
+				<xs:attribute name="message" type="xs:string" use="required" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="abstractClientMessage" abstract="true">
+		<xs:complexContent>
+			<xs:extension base="abstractMessage">
+				<xs:sequence />
+				<xs:attribute name="clientID" type="xs:string" use="required" />
+				<xs:attribute name="priority" type="xs:int" use="required" />
+				<xs:attribute name="datetime" type="xs:anySimpleType"
+					use="required" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="abstractMessage" abstract="true">
+		<xs:sequence />
+	</xs:complexType>
+
+	<xs:complexType name="filePutMessage">
+		<xs:complexContent>
+			<xs:extension base="abstractClientMessage">
+				<xs:sequence>
+					<xs:element name="data" type="xs:string" minOccurs="0" />
+					<xs:element name="chunkNo" type="xs:int" />
+					<xs:element name="chunkSize" type="xs:int" />
+					<xs:element name="isLast" type="xs:boolean" />
+				</xs:sequence>
+				<xs:attribute name="filename" type="xs:string" use="required" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="fileGetMessage" final="extension restriction">
+		<xs:complexContent>
+			<xs:extension base="simpleMessage">
+				<xs:sequence>
+					<xs:element name="chunkNo" type="xs:int" />
+					<xs:element name="chunkSize" type="xs:int" />
+				</xs:sequence>
+				<xs:attribute name="isInitMessage" type="xs:boolean"
+					use="required" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="errorMessage">
+		<xs:complexContent>
+			<xs:extension base="abstractMessage">
+				<xs:sequence>
+					<xs:element name="details" type="xs:string" minOccurs="0" />
+				</xs:sequence>
+				<xs:attribute name="id" type="xs:string" use="required" />
+				<xs:attribute name="code" type="xs:string" use="required" />
+				<xs:attribute name="originMsgType" type="xs:string"
+					use="required" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+</xs:schema>
+
