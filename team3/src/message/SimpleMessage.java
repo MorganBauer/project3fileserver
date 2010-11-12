@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 
 @XmlRootElement(name="SimpleMessage")
-@MsgType(MsgType.IS.ATOMIC)
+@Message(Message.Type.ATOMIC)
 public class SimpleMessage extends AbstractClientMessage {
 	
 	/** The message delivered*/

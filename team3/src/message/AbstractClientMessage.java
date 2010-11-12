@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * Abstraction of our Message Object. Defines clientID.
  */
 @XmlRootElement(name="AbstractClientMessage")
-@MsgType(MsgType.IS.UNKNOWN)
+@Message(Message.Type.UNKNOWN)
 public abstract class AbstractClientMessage extends AbstractMessage  {
 
 	

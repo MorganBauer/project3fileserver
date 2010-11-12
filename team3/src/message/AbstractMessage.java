@@ -25,6 +25,10 @@ public abstract class AbstractMessage implements IMessage {
 	@XmlAttribute(required=true)
 	private XMLGregorianCalendar datetime;
 	
+	/**
+	 * Returns the timestamp associated with this message
+	 * @return the XMLGregorianCalendar timestamp
+	 */
 	public XMLGregorianCalendar getDateTime(){ return datetime; }
 	
 	public String marshal() throws JAXBException {

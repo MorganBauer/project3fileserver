@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="SimpleResponse" type="simpleResponse"/>
+
+  <xs:complexType name="simpleResponse" final="extension restriction">
+    <xs:complexContent>
+      <xs:extension base="abstractResponse">
+        <xs:sequence>
+          <xs:element name="directory" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="message" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="abstractResponse" abstract="true">
+    <xs:sequence/>
+  </xs:complexType>
+</xs:schema>
+

@@ -10,7 +10,7 @@ import java.lang.annotation.RetentionPolicy;
  * of message.
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MsgType {
-	enum IS{ATOMIC, READ, WRITE, ERROR,UNKNOWN, VOTE, UPDATE};
-	IS value();
+public @interface Message {
+	enum Type{ATOMIC, READ, WRITE, ERROR, UNKNOWN, VOTE, UPDATE};
+	Type value();
 }

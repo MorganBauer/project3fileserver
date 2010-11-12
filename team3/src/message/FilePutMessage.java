@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 
 @XmlRootElement(name="FilePutMessage")
-@MsgType(MsgType.IS.WRITE)
+@Message(Message.Type.WRITE)
 public class FilePutMessage extends AbstractClientMessage {
 	@XmlAttribute(required=true)
 	private String filename;

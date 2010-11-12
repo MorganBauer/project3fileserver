@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * 
  */
 @XmlRootElement(name = "FileGetMessage")
-@MsgType(MsgType.IS.READ)
+@Message(Message.Type.READ)
 public final class FileGetMessage extends SimpleMessage {
 
 	@XmlElement()

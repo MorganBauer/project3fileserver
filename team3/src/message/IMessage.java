@@ -8,7 +8,7 @@ import javax.xml.bind.JAXBException;
  * @author Joir-dan Gumbs
  * This is the interface for all messages to follow
  * A Message MUST have an ID, and a Message must be READABLE
- * The {@link MsgType} Annotation will denote whether a Message
+ * The {@link Message} Annotation will denote whether a Message
  * is asking for atomic privileges, read privileges, or write privileges.
  */
 public interface IMessage {
