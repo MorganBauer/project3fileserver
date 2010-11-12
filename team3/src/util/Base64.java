@@ -73,7 +73,7 @@ public class Base64 {
      * base-64 encode a byte array
      * @param src	The byte array to encode
      * @param start	The starting index
-     * @param len	The number of bytes
+     * @param length	The number of bytes
      * @return		The base64 encoded result
      */
 
