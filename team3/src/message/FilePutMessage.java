@@ -4,7 +4,12 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-
+/**
+ * Message object for requesting pushing data to the server and
+ * actually sending the data.
+ * @author Joir-dan Gumbs
+ *
+ */
 @XmlRootElement(name="FilePutMessage")
 @Message(Message.Type.WRITE)
 public class FilePutMessage extends AbstractClientMessage {
