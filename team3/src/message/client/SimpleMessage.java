@@ -1,4 +1,6 @@
-package team3.src.message;
+package team3.src.message.client;
+
+import team3.src.message.Message;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlAttribute;

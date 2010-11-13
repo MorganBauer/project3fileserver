@@ -14,6 +14,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import team3.src.message.client.AbstractClientMessage;
+
 public abstract class AbstractMessage implements IMessage {
 
 	static {
@@ -39,20 +41,20 @@ public abstract class AbstractMessage implements IMessage {
 		return writer.toString();
 	}
 	
-	/**
-	 * Converts xml message into a message object 
-	 * @param xml - Message received from client (or other servers)
-	 * @return IMessage object
-	 * @throws JAXBException  if unable to convert
-	 */
-	public static AbstractMessage unmarshal(String xml) throws JAXBException{
-		ByteArrayInputStream inputStream = new ByteArrayInputStream(xml.getBytes());
-		JAXBContext jc = JAXBContext.newInstance(AbstractMessage.class.getPackage().getName());
-		Unmarshaller u = jc.createUnmarshaller();
-		return (AbstractMessage) u.unmarshal(inputStream); 
-	}
-	
 	protected AbstractMessage(){
 		this.datetime = factory.newXMLGregorianCalendar(now);
 	}
+	
+	   /**
+     * Converts xml message into a message object 
+     * @param xml - Message received from client (or other servers)
+     * @return IMessage object
+     * @throws JAXBException  if unable to convert
+     */
+    public static AbstractMessage unmarshal(String xml) throws JAXBException{
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(xml.getBytes());
+        JAXBContext jc = JAXBContext.newInstance(AbstractMessage.class.getPackage().getName());
+        Unmarshaller u = jc.createUnmarshaller();
+        return (AbstractMessage) u.unmarshal(inputStream); 
+    }
 }

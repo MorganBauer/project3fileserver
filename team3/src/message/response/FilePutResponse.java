@@ -5,7 +5,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Response to the FilePut message received by the server from the client.
- * 
  * @author Joir-dan Gumbs
  *
  */

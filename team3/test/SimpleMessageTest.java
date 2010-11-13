@@ -3,10 +3,10 @@ import javax.xml.bind.JAXBException;
 
 import junit.framework.TestCase;
 
-import team3.src.message.AbstractClientMessage;
-import team3.src.message.FileGetMessage;
-import team3.src.message.FilePutMessage;
-import team3.src.message.SimpleMessage;
+import team3.src.message.client.AbstractClientMessage;
+import team3.src.message.client.FileGetMessage;
+import team3.src.message.client.FilePutMessage;
+import team3.src.message.client.SimpleMessage;
 
 import org.junit.Test;
 

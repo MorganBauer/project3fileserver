@@ -1,7 +1,10 @@
 package team3.src.message;
-import static team3.src.message.SimpleMessage.*;
-import static team3.src.message.FileGetMessage.*;
-import static team3.src.message.FilePutMessage.*;
+import static team3.src.message.client.SimpleMessage.*;
+import static team3.src.message.client.FileGetMessage.*;
+import static team3.src.message.client.FilePutMessage.*;
+import team3.src.message.client.FileGetMessage;
+import team3.src.message.client.FilePutMessage;
+import team3.src.message.client.SimpleMessage;
 
 
 /**
