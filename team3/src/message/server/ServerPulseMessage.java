@@ -22,7 +22,7 @@ public final class ServerPulseMessage extends AbstractServerMessage {
     public int getLoad(){ return load; }
     /**
      * Gets the current directory of this server
-     * @return
+     * @return current directory
      */
     public String[] getDirectory(){
         return directory;

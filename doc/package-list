@@ -1,4 +1,6 @@
 team3.src.message
+team3.src.message.client
 team3.src.message.response
+team3.src.message.server
 team3.src.util
 team3.test

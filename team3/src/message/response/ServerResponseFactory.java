@@ -33,7 +33,7 @@ public class ServerResponseFactory extends AbstractMessageFactory {
 	 * Creates a File Get data Response message
 	 * @param data data to be sent
 	 * @param chunkSize how large of a chunk the data is
-	 * @param isLast　is this the last chunk?
+	 * @param isLast is this the last chunk?
 	 * @return new response 
 	 */
 	public static final FileGetResponse createFileGetDataResponse(String data, int chunkSize, boolean isLast){

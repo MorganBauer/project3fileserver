@@ -19,7 +19,7 @@ public class ServerVotingMessage extends AbstractServerMessage implements Compar
     }
    /**
     * Gets the timestamp of the server that created this message
-    * @return
+    * @return timestamp
     */
     public final XMLGregorianCalendar getTimestamp(){
         return timestamp;

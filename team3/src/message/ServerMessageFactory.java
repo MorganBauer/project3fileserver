@@ -11,7 +11,7 @@ public final class ServerMessageFactory extends AbstractMessageFactory {
     
     /**
      * Grab the factory for building server messages
-     * @return
+     * @return server message factory
      */
     public static final ServerMessageFactory getFactory(){
         return (singleton != null)?singleton:(singleton = new ServerMessageFactory());
