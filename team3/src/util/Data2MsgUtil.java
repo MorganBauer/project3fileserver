@@ -120,7 +120,7 @@ public final class Data2MsgUtil {
 	}
 	
 	/** Creates new object without setting verbose flag (default is false) */
-	public Data2MsgUtil(){ this.verbose = false; }
+	private Data2MsgUtil(){ this.verbose = false; }
 	/** Creates new object. This constructor should only be called for testing purposes. */
 	public Data2MsgUtil(boolean verbose){ this.verbose = verbose; }
 	
@@ -145,6 +145,12 @@ public final class Data2MsgUtil {
 			util.cleanup();
 		}
 		
+	}
+	/**
+	 * Return a new Data2MsgUtil object
+	 */
+	public static Data2MsgUtil getUtil(){
+		return new Data2MsgUtil();
 	}
 
 }

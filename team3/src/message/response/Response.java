@@ -5,6 +5,6 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Response {
-    enum Type {END, DATA, WAIT}
+    enum Type {END, DATA, WAIT, ERROR}
     Type value();
 }

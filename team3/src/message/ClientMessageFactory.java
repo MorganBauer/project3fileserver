@@ -1,10 +1,12 @@
 package team3.src.message;
+import static team3.src.message.ErrorMessage.buildErrorMessage;
 import static team3.src.message.client.SimpleMessage.*;
 import static team3.src.message.client.FileGetMessage.*;
 import static team3.src.message.client.FilePutMessage.*;
 import team3.src.message.client.FileGetMessage;
 import team3.src.message.client.FilePutMessage;
 import team3.src.message.client.SimpleMessage;
+import team3.src.message.response.AbstractResponse;
 
 
 /**
@@ -12,7 +14,7 @@ import team3.src.message.client.SimpleMessage;
  * @author Joir-dan Gumbs
  *
  */
-public final class ClientMessageFactory extends AbstractMessageFactory{
+public final class ClientMessageFactory{
 	private static ClientMessageFactory singleton;
 	/**
 	 * Grabs the factory for making client messages
@@ -95,4 +97,25 @@ public final class ClientMessageFactory extends AbstractMessageFactory{
 		return buildPullMessage(clientID, filename, priority, chunkNo, chunkSize);
 	}
 	
+	/**
+	 * Builds an error message to be sent back to client or server
+	 * @param id who is sending this message
+	 * @param sentMsg the previous message that caused the error
+	 * @param ecode the error code associated with this.
+	 * @return an {@link ErrorMessage} to be sent
+	 */
+	public ErrorMessage createErrorMessage(String id, AbstractResponse sentMsg, String ecode){
+		return buildErrorMessage(id, sentMsg, ecode);
+	}
+	/**
+	 * builds an error message to be sent back to the client or server with details
+	 * @param id who sent the message
+	 * @param sentMsg the message that caused the failure
+	 * @param ecode the error code associated with the error
+	 * @param details extra information that would be useful
+	 * @return new error message
+	 */
+	public ErrorMessage createErrorMessage(String id, AbstractResponse sentMsg, String ecode, String details){
+		return buildErrorMessage(id, sentMsg, ecode, details);
+	}
 }

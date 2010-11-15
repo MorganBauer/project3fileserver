@@ -1,10 +1,12 @@
 package team3.src.message.response;
 
+import static team3.src.message.response.ErrorResponse.buildErrorMessage;
 import static team3.src.message.response.FileGetResponse.*;
 import static team3.src.message.response.FilePutResponse.*;
 import static team3.src.message.response.WaitResponse.*;
 import static team3.src.message.response.SimpleResponse.*;
-import team3.src.message.AbstractMessageFactory;
+import team3.src.message.AbstractMessage;
+import team3.src.message.ErrorMessage;
 
 /**
  * This is the factory that should be used by the server to 
@@ -12,7 +14,7 @@ import team3.src.message.AbstractMessageFactory;
  * @author Joir-dan Gumbs
  *
  */
-public class ServerResponseFactory extends AbstractMessageFactory {
+public class ServerResponseFactory {
 	private static ServerResponseFactory singleton;
 	
 	/**
@@ -76,5 +78,25 @@ public class ServerResponseFactory extends AbstractMessageFactory {
 	public static final SimpleResponse createDirListResposne(String[] directory){
 	    return buildResponseDirList(directory);
 	}
-	
+	/**
+	 * Builds an error message to be sent back to client or server
+	 * @param id who is sending this message
+	 * @param sentMsg the previous message that caused the error
+	 * @param ecode the error code associated with this.
+	 * @return an {@link ErrorMessage} to be sent
+	 */
+	public ErrorResponse createErrorMessage(String id, AbstractMessage sentMsg, String ecode){
+		return buildErrorMessage(id, sentMsg, ecode);
+	}
+	/**
+	 * builds an error message to be sent back to the client or server with details
+	 * @param id who sent the message
+	 * @param sentMsg the message that caused the failure
+	 * @param ecode the error code associated with the error
+	 * @param details extra information that would be useful
+	 * @return new error message
+	 */
+	public ErrorResponse createErrorMessage(String id, AbstractMessage sentMsg, String ecode, String details){
+		return buildErrorMessage(id, sentMsg, ecode, details);
+	}
 }

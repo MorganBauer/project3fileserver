@@ -16,6 +16,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import team3.src.message.client.AbstractClientMessage;
 
+@Message(Message.Type.UNKNOWN)
 public abstract class AbstractMessage implements IMessage {
 
 	static {
@@ -39,6 +40,13 @@ public abstract class AbstractMessage implements IMessage {
 		Marshaller m = jc.createMarshaller();
 		m.marshal(this, writer);
 		return writer.toString();
+	}
+	/**
+	 * Figure out what type of message this is...
+	 * @return
+	 */
+	public Message.Type getMsgType(){
+		return this.getClass().getAnnotation(Message.class).value();
 	}
 	
 	protected AbstractMessage(){
