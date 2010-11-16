@@ -31,7 +31,6 @@ public final class ServerMessageFactory{
         return buildVotingMessage(host, port, timestamp);
     }
     /**
-     * @see ServerPulseMessage.buildPulse
      * @param host who is sending this
      * @param port the port of the sender
      * @param load how many clients are currently enqueue
@@ -41,11 +40,10 @@ public final class ServerMessageFactory{
     	return buildPulse(host, port, load);
     }
     /**
-     * @see ServerPulseMessage.buildPulseWithUpdate
      * @param host who is sending this
      * @param port the port of the sender
      * @param load how many clients are currently enqueue
-     * @param currentDirectory what the current file directory looks like
+     * @param currentDir what the current file directory looks like
      * @return pulse message
      */
     public ServerPulseMessage createPulseWithUpdate(String host, int port, int load, String[] currentDir){

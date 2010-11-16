@@ -14,7 +14,6 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import team3.src.message.client.AbstractClientMessage;
 
 @Message(Message.Type.UNKNOWN)
 public abstract class AbstractMessage implements IMessage {
@@ -43,7 +42,7 @@ public abstract class AbstractMessage implements IMessage {
 	}
 	/**
 	 * Figure out what type of message this is...
-	 * @return
+	 * @return message type
 	 */
 	public Message.Type getMsgType(){
 		return this.getClass().getAnnotation(Message.class).value();

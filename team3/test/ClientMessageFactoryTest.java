@@ -7,9 +7,8 @@ import org.junit.After;
 import org.junit.Before;
 
 import team3.src.message.client.AbstractClientMessage;
-import team3.src.message.AbstractMessage;
 import team3.src.message.ClientMessageFactory;
-import team3.src.message.ErrorMessage;
+
 import org.junit.Test;
 
 public class ClientMessageFactoryTest extends TestCase{
@@ -34,16 +33,15 @@ public class ClientMessageFactoryTest extends TestCase{
 		assertEquals(m.toString(), AbstractClientMessage.unmarshal(XML).toString());
 	}
 	@Test
+	public void testDeleteMessage() throws JAXBException{
+	    XML = (m = cmf.createDeleteMessage("900.001", 2, "UFBCSChamps2011.mov")).marshal();
+	    assertEquals(m.toString(), AbstractClientMessage.unmarshal(XML).toString());
+	}
+	
+	@Test
 	public void testDirMessage() throws JAXBException{
 		XML = (m = cmf.createDirListMessage("800.003", 4, 0, 5)).marshal();
 		assertEquals(m.toString(), AbstractClientMessage.unmarshal(XML).toString());
-	}
-	@Test
-	public void testErrorMessage() throws JAXBException{
-		m = cmf.createDirListMessage("800.003", 4, 0, 5);
-		ErrorMessage n = cmf.createErrorMessage("800.004", m, "0x005", "Somethign happened");
-		XML = n.marshal();
-		assertEquals(n.toString(), AbstractMessage.unmarshal(XML).toString());
 	}
 	@Test
 	public void testFileGetInitMessage() throws JAXBException{

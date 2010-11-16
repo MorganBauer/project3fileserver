@@ -1,6 +1,7 @@
 package team3.src.message.response;
 
-import static team3.src.message.response.ErrorResponse.buildErrorMessage;
+import static team3.src.message.response.ErrorResponse.*;
+import static team3.src.message.response.DeleteResponse.*;
 import static team3.src.message.response.FileGetResponse.*;
 import static team3.src.message.response.FilePutResponse.*;
 import static team3.src.message.response.WaitResponse.*;
@@ -25,10 +26,19 @@ public class ServerResponseFactory {
 		return (singleton!=null)?singleton:(singleton = new ServerResponseFactory());
 	}
 	/**
+	 * Create a Delete response message
+	 * @param filename the filename that was deleted
+	 * @return new delete response
+	 */
+	public final DeleteResponse createDeleteResponse(String filename){
+	    return buildDeleteResponse(filename);
+	}
+	
+	/**
 	 * Create a FileGet initial response message
 	 * @return new response
 	 */
-	public static final FileGetResponse createFileGetInitResponse(){
+	public final FileGetResponse createFileGetInitResponse(){
 		return buildFileGetInitResponse();
 	}
 	/**
@@ -38,7 +48,7 @@ public class ServerResponseFactory {
 	 * @param isLast is this the last chunk?
 	 * @return new response 
 	 */
-	public static final FileGetResponse createFileGetDataResponse(String data, int chunkSize, boolean isLast){
+	public final FileGetResponse createFileGetDataResponse(String data, int chunkSize, boolean isLast){
 		return buildFileGetDataResponse(data, chunkSize, isLast);
 	}
 	/**
@@ -46,28 +56,28 @@ public class ServerResponseFactory {
 	 * @param filename the file the client wants to add/update
 	 * @return new response object
 	 */
-	public static final FilePutResponse createFilePutResponse(String filename){
+	public final FilePutResponse createFilePutResponse(String filename){
 	    return buildFilePutResponse(filename);
 	}
 	/**
 	 * Creates a wait response message for the client
 	 * @return new response message
 	 */
-	public static final WaitResponse createWaitResponse(){
+	public final WaitResponse createWaitResponse(){
 	    return buildWaitResponse();
 	}
 	/**
 	 * Create a Hello Message Response
 	 * @return new response message
 	 */
-	public static final SimpleResponse createHelloResponse(){
+	public final SimpleResponse createHelloResponse(){
 	    return buildResponseHello();
 	}
 	/**
 	 * Create a Terminate Message Response
 	 * @return new response message
 	 */
-	public static final SimpleResponse createTerminateResponse(){
+	public final SimpleResponse createTerminateResponse(){
 	    return buildResponseTerminate();
 	}
 	/**
@@ -75,7 +85,7 @@ public class ServerResponseFactory {
 	 * @param directory the directory of the distributed System
 	 * @return new Response message with directory
 	 */
-	public static final SimpleResponse createDirListResposne(String[] directory){
+	public final SimpleResponse createDirListResponse(String[] directory){
 	    return buildResponseDirList(directory);
 	}
 	/**

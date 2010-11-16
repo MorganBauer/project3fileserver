@@ -23,6 +23,10 @@ public class FilePutResponse extends AbstractResponse {
         return filename;
     }
 
+    public String toString(){
+        return String.format("Response to File Put on %s", filename);
+    }
+    
     private FilePutResponse(){ }
     
     private FilePutResponse(String filename){

@@ -1,7 +1,6 @@
 /**
  * 
  */
-package team3;
 
 /**
  * @author Joir-dan Gumbs

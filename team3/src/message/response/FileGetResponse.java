@@ -18,6 +18,11 @@ public final class FileGetResponse extends AbstractResponse {
     @XmlElement()
     private int chunkSize;
     
+    public String toString(){
+        return (isData)?
+                String.format("Init Response to file Get"):
+                String.format("Data Response to file Get. ISLAST:%b, SIZE:%d", isLast, chunkSize);
+    }
     
     /**
      * Checks to see if this is the last message being sent
