@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement(name="FilePutResponse")
-@Response(Response.Type.DATA)
+@Response(Response.Type.DATA_OUT)
 public class FilePutResponse extends AbstractResponse {
 
     //TODO: FINISH THIS UP... 

@@ -24,6 +24,11 @@ public class ServerClientProtocol extends AbstractProtocol {
 	
 	private ServerResponseFactory responseFactory;
 	
+	/**
+	 * Returns a new protocol object
+	 * @param id identifier of protocol user
+	 * @return new protocol
+	 */
 	public static final ServerClientProtocol getProtocol(String id){
 		return new ServerClientProtocol(id);
 	}
@@ -70,6 +75,14 @@ public class ServerClientProtocol extends AbstractProtocol {
 	}
 	
 	/**
+	 * Create a wait response message to send to client
+	 * @return new AbstractResponse
+	 */
+	public AbstractResponse generateWaitMessage(){
+	    return responseFactory.createWaitResponse();
+	}
+	
+	/**
 	 * Handles FileGet Requests
 	 * @param msg the message that was sent
 	 * @return an AbstractResponse
@@ -108,29 +121,21 @@ public class ServerClientProtocol extends AbstractProtocol {
 	    return responseFactory.createErrorMessage(id, msg, FILE_NOT_FOUND, "File couldn't be found");    
 	}
 	
+
 	/**
-	 * Get the directory subsequence for directory message
-	 * @param start start position in the list
-	 * @param nmax maximum entries to return
-	 * @return subsequence of directory list
-	 */
-	// TODO: WILL NEED TO DO SOME MODIFYING LATER
-	private String[] getDirectory(int start, int nmax){
-	    ArrayList<String> list = new ArrayList<String>();
-	    if(getBackupDir().length < start || start < 0) return null;
-	    nmax = Math.min(nmax, getBackupDir().length);
-	    for(int i = start; i < nmax; i++) list.add(getBackupDir()[i]);
-	    return (String[]) list.toArray();
-	}
-	/**
-	 * Check to see if a file exists
-	 * @param filename name of file
-	 * @return true if exists, false otherwise
-	 */
-	private boolean exists(String filename){
-	    File file = new File(filename);
-	    return file.exists();
-	}
+     * Get the directory subsequence for directory message
+     * @param start start position in the list
+     * @param nmax maximum entries to return
+     * @return subsequence of directory list
+     */
+    // TODO: WILL NEED TO DO SOME MODIFYING LATER
+    protected String[] getDirectory(int start, int nmax){
+        ArrayList<String> list = new ArrayList<String>();
+        if(getBackupDir().length < start || start < 0) return null;
+        nmax = Math.min(nmax, getBackupDir().length);
+        for(int i = start; i < nmax; i++) list.add(getBackupDir()[i]);
+        return (String[]) list.toArray();
+    }
 	
 	//TODO: THIS MAY NEED TO BE EDITED A BIT later
 	/**

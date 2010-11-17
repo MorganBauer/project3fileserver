@@ -50,6 +50,16 @@ public abstract class AbstractProtocol {
 	 */
 	public String[] getBackupDir(){ return backupDir; }
 	
+    /**
+     * Check to see if a file exists
+     * @param filename name of file
+     * @return true if exists, false otherwise
+     */
+    protected boolean exists(String filename){
+        File file = new File(filename);
+        return file.exists();
+    }
+	
 	protected AbstractProtocol(String id){
 		this.id = id;
 	}

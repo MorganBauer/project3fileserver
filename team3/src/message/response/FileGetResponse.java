@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 
 @XmlRootElement(name="FileGetResponse")
-@Response(Response.Type.DATA)
+@Response(Response.Type.DATA_IN)
 public final class FileGetResponse extends AbstractResponse {
     
     @XmlAttribute(required=true)
