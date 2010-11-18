@@ -3,7 +3,11 @@ package team3.src.message.response;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
+/**
+ * 
+ * @author Joir-dan Gumbs
+ *
+ */
 @XmlRootElement(name="SimpleResponse")
 @Response(Response.Type.END)
 public final class SimpleResponse extends AbstractResponse {

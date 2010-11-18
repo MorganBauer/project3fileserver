@@ -4,7 +4,11 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-
+/**
+ * 
+ * @author Joir-dan Gumbs
+ *
+ */
 @XmlRootElement(name="FileGetResponse")
 @Response(Response.Type.DATA_IN)
 public final class FileGetResponse extends AbstractResponse {

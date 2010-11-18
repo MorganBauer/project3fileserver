@@ -2,6 +2,11 @@ package team3.src.message.response;
 
 import javax.xml.bind.JAXBException;
 
+/**
+ * 
+ * @author Joir-dan Gumbs
+ *
+ */
 public interface IResponse {
     /**
      * Allows recipient to read response contents

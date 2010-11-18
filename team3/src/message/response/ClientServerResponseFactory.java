@@ -15,15 +15,15 @@ import team3.src.message.ErrorMessage;
  * @author Joir-dan Gumbs
  *
  */
-public class ServerResponseFactory {
-	private static ServerResponseFactory singleton;
+public class ClientServerResponseFactory {
+	private static ClientServerResponseFactory singleton;
 	
 	/**
 	 * Grabs the factory for making response messages
 	 * @return a factory
 	 */
-	public static final ServerResponseFactory getFactory(){
-		return (singleton!=null)?singleton:(singleton = new ServerResponseFactory());
+	public static final ClientServerResponseFactory getFactory(){
+		return (singleton!=null)?singleton:(singleton = new ClientServerResponseFactory());
 	}
 	/**
 	 * Create a Delete response message

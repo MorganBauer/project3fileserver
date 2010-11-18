@@ -13,7 +13,7 @@ import team3.src.message.client.FileGetMessage;
 import team3.src.message.client.FilePutMessage;
 import team3.src.message.client.SimpleMessage;
 import team3.src.message.response.AbstractResponse;
-import team3.src.message.response.ServerResponseFactory;
+import team3.src.message.response.ClientServerResponseFactory;
 import team3.src.util.Data2MsgUtil;
 
 /**
@@ -22,7 +22,7 @@ import team3.src.util.Data2MsgUtil;
  */
 public class ServerClientProtocol extends AbstractProtocol {
 	
-	private ServerResponseFactory responseFactory;
+	private ClientServerResponseFactory responseFactory;
 	
 	/**
 	 * Returns a new protocol object

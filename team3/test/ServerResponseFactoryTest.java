@@ -9,18 +9,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 import team3.src.message.response.AbstractResponse;
-import team3.src.message.response.ServerResponseFactory;
+import team3.src.message.response.ClientServerResponseFactory;
 
 
 public class ServerResponseFactoryTest extends TestCase {
 
-    public ServerResponseFactory smf;
+    public ClientServerResponseFactory smf;
     AbstractResponse s;
     String XML;
     
     @Before
     public void setUp(){
-        smf = ServerResponseFactory.getFactory();
+        smf = ClientServerResponseFactory.getFactory();
     }
     
     @Test

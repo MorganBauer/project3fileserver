@@ -2,7 +2,11 @@ package team3.src.message.response;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
+/**
+ * 
+ * @author Joir-dan Gumbs
+ *
+ */
 @XmlRootElement(name="DeleteResponse")
 @Response(Response.Type.END)
 public class DeleteResponse extends AbstractResponse {
