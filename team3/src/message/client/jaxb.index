@@ -2,4 +2,3 @@ SimpleMessage
 FilePutMessage
 FileGetMessage
 AbstractClientMessage
-DeleteMessage

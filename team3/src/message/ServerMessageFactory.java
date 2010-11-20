@@ -1,13 +1,16 @@
 package team3.src.message;
 
+import static team3.src.message.DeleteMessage.buildDeleteMessage;
 import static team3.src.message.response.ErrorResponse.buildErrorMessage;
 import static team3.src.message.server.ServerVotingMessage.*;
 import static team3.src.message.server.ServerPulseMessage.*;
+import static team3.src.message.server.ServerReplicationMessage.buildReplicationMessage;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import team3.src.message.response.ErrorResponse;
 import team3.src.message.server.ServerPulseMessage;
+import team3.src.message.server.ServerReplicationMessage;
 import team3.src.message.server.ServerVotingMessage;
 
 public final class ServerMessageFactory{
@@ -20,6 +23,18 @@ public final class ServerMessageFactory{
     public static final ServerMessageFactory getFactory(){
         return (singleton != null)?singleton:(singleton = new ServerMessageFactory());
     }
+    
+    /**
+     * Builds a message that asks for data that is not currently on this system
+     * @param host who wants the data
+     * @param port what location
+     * @param filename name of the file we want
+     * @return new replication message
+     */
+    public ServerReplicationMessage createReplicationMessage(String host, int port, String filename){
+        return buildReplicationMessage(host, port, filename);
+    }
+    
     /**
      * Build a message that casts a vote for leadership within distributed system
      * @param host the hostname of this server
@@ -27,9 +42,21 @@ public final class ServerMessageFactory{
      * @param timestamp When this server was "born." The older the machine, the higher chance it will be accepted as leader
      * @return a vote message
      */
-    public ServerVotingMessage createVotingMessage(String host, int port, XMLGregorianCalendar timestamp){
+    public ServerVotingMessage createCandidateMessage(String host, int port, XMLGregorianCalendar timestamp){
         return buildVotingMessage(host, port, timestamp);
     }
+    
+    /**
+     * Create a delete message
+     * @param clientID the client doing the deleting
+     * @param priority how important this operation is
+     * @param filename the file we want to delete
+     * @return a new delete message
+     */
+    public final DeleteMessage createDeleteMessage(String clientID, int priority, String filename){
+        return buildDeleteMessage(clientID, priority, filename);
+    }
+    
     /**
      * @param host who is sending this
      * @param port the port of the sender

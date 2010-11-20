@@ -32,11 +32,6 @@ public class ClientMessageFactoryTest extends TestCase{
 		XML = (m = cmf.createTerminateMessage("800.002")).marshal();
 		assertEquals(m.toString(), AbstractClientMessage.unmarshal(XML).toString());
 	}
-	@Test
-	public void testDeleteMessage() throws JAXBException{
-	    XML = (m = cmf.createDeleteMessage("900.001", 2, "UFBCSChamps2011.mov")).marshal();
-	    assertEquals(m.toString(), AbstractClientMessage.unmarshal(XML).toString());
-	}
 	
 	@Test
 	public void testDirMessage() throws JAXBException{

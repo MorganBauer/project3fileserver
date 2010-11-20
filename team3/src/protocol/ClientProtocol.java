@@ -11,10 +11,16 @@ import team3.src.message.ClientMessageFactory;
 import team3.src.message.response.AbstractResponse;
 import team3.src.message.response.FileGetResponse;
 import team3.src.message.response.FilePutResponse;
+import team3.src.message.response.SimpleResponse;
 import team3.src.util.Data2MsgUtil;
 
 import static java.lang.System.out;
 
+/**
+ * Handles the business logic behind the client process
+ * @author Joir-dan Gumbs
+ *
+ */
 public final class ClientProtocol extends AbstractProtocol{
 
     private ClientMessageFactory messageFactory;
@@ -61,6 +67,14 @@ public final class ClientProtocol extends AbstractProtocol{
     }
     
     /**
+     * Allows the client to set chunksize
+     * @param chunkSize - max size of data chunks being sent.
+     */
+    public void setCurrentChunkSize(int chunkSize){
+        this.chunkSize = chunkSize;
+    }
+    
+    /**
      * Handles the next message to be sent
      * @param msg response from server
      * @return new AbstractMessage
@@ -73,14 +87,38 @@ public final class ClientProtocol extends AbstractProtocol{
         }
     }
     
-    public AbstractMessage handleNextGet(FileGetResponse msg){
+    /**
+     * Creates next message for FileGet sequence
+     * @param msg response from the server
+     * @return new FileGet message
+     */
+    private AbstractMessage handleNextGet(FileGetResponse msg){
         return getNextFileGetMsg(msg);
     }
     
-    public AbstractMessage handleNextPut(FilePutResponse msg){
+    /**
+     * Creates next message for FilePut sequence
+     * @param msg response from the server
+     * @return new FilePut message
+     */
+    private AbstractMessage handleNextPut(FilePutResponse msg){
         return getNextFilePutMsg(msg);
     }
     
+    /**
+     * Handles simpleResponse actions from messages received from the server
+     * @param msg msg that was recieved
+     */
+    public void handleSimpleResponse(AbstractResponse msg){
+        if(!msg.read().equals("Directory")) out.println(msg.toString());
+        else{
+            String[] dir = ((SimpleResponse) msg).readDir();
+            String format = "%1$-40s%2$-40s\n";
+            for(int i = 0; i < dir.length; i=i+2){
+                out.format(format, dir[i], ((i + 1 < dir.length) && (i+1 < dir.length))?dir[i+1]:" ");
+            }
+        }
+    }
     
     /**
      * Sets the requestID to id

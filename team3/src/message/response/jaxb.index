@@ -3,3 +3,4 @@ FileGetResponse
 FilePutResponse
 WaitResponse 
 DeleteResponse
+ErrorResponse

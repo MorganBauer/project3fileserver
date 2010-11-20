@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import team3.src.message.AbstractMessage;
-import team3.src.message.client.DeleteMessage;
+import team3.src.message.DeleteMessage;
 import team3.src.message.client.FileGetMessage;
 import team3.src.message.client.FilePutMessage;
 import team3.src.message.client.SimpleMessage;
@@ -113,6 +113,11 @@ public class ServerClientProtocol extends AbstractProtocol {
         return responseFactory.createFilePutResponse(msg.getFilename());
 	}
 	
+	/**
+	 * Handles Delete Messages
+	 * @param msg what was sent
+	 * @return Abstract Respone
+	 */
 	private AbstractResponse handleFileDelete(DeleteMessage msg){
 	    if(exists(msg.read())) 
 	        return (delete(msg.read()))?

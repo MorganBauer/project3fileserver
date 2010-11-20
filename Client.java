@@ -77,10 +77,8 @@ public class Client extends AbstractClient {
             AbstractResponse fromServer;
             for(String arg : commandArgs) init+=arg+" ";
             try{
-                
                 toServer = protocol.handleInput(commandArgs, getName());
                 //printFriendly = protocol.stripData(toServer);
-                //out.println(printFriendly);
                 //logger.log(printFriendly);
                 writeToServer(toServer);
                 while(weCantStop()){
@@ -90,7 +88,7 @@ public class Client extends AbstractClient {
                             case ERROR:
                             case END:
                                 toServer = null;
-                                out.println(fromServer.toString());
+                                protocol.handleSimpleResponse(fromServer);
                                 prepareToFinish();
                                 break;
                             case DATA_IN:

@@ -1,5 +1,6 @@
 package team3.src.message.response.server;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -13,12 +14,18 @@ import team3.src.message.response.Response;
  */
 @XmlRootElement(name="DataReplicationMessage")
 @Response(Response.Type.DATA_IN)
-public final class ServerDataReplicationResponse extends AbstractResponse {
+public final class ServerReplicationResponse extends AbstractResponse {
 
     @XmlElement(required=true)
     private String base64Data;
     @XmlElement(required=true)
     private String filename;
+    @XmlAttribute(required=true)
+    private boolean isLast;
+    
+    public boolean isLast(){
+        return isLast;
+    }
     
     /**
      * Gets the filename of this chunk
@@ -35,12 +42,13 @@ public final class ServerDataReplicationResponse extends AbstractResponse {
         return base64Data;
     }
     
-    private ServerDataReplicationResponse(String filename, String base64Data){
+    private ServerReplicationResponse(String filename, String base64Data, boolean isLast){
         this.filename = filename;
         this.base64Data = base64Data;
+        this.isLast = isLast;
     }
     
-    private ServerDataReplicationResponse(){}
+    private ServerReplicationResponse(){}
     /**
      * Creates a new ServerDataReplicationMessage
      * @param host who is sending it
@@ -49,7 +57,7 @@ public final class ServerDataReplicationResponse extends AbstractResponse {
      * @param base64Data the data
      * @return new replication message
      */
-    public static ServerDataReplicationResponse buildReplicationMessage(String filename, String base64Data){
-        return new ServerDataReplicationResponse(filename, base64Data);
+    public static ServerReplicationResponse buildReplicationMessage(String filename, String base64Data, boolean isLast){
+        return new ServerReplicationResponse(filename, base64Data, isLast);
     }
 }
