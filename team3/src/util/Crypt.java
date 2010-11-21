@@ -46,7 +46,7 @@ public class Crypt
          }
          resultIx++; 
       }
-      return result; 
+      return result;  
    }
    public static String encrypt(String data, byte[] secret)
    {
