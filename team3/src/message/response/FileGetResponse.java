@@ -4,9 +4,13 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-
+/**
+ * 
+ * @author Joir-dan Gumbs
+ *
+ */
 @XmlRootElement(name="FileGetResponse")
-@Response(Response.Type.DATA)
+@Response(Response.Type.DATA_IN)
 public final class FileGetResponse extends AbstractResponse {
     
     @XmlAttribute(required=true)
@@ -18,6 +22,11 @@ public final class FileGetResponse extends AbstractResponse {
     @XmlElement()
     private int chunkSize;
     
+    public String toString(){
+        return (isData)?
+                String.format("Init Response to file Get"):
+                String.format("Data Response to file Get. ISLAST:%b, SIZE:%d", isLast, chunkSize);
+    }
     
     /**
      * Checks to see if this is the last message being sent

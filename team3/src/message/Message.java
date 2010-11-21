@@ -11,6 +11,6 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Message {
-	enum Type{ATOMIC, READ, WRITE, ERROR, UNKNOWN, VOTE, UPDATE};
+	enum Type{ATOMIC, READ, WRITE, DELETE, ERROR, UNKNOWN, VOTE, UPDATE, REPLICATE, PULSE};
 	Type value();
 }

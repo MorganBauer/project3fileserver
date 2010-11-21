@@ -1,8 +1,11 @@
 package team3.src.message;
-import static team3.src.message.ErrorMessage.buildErrorMessage;
+
+import static team3.src.message.DeleteMessage.*;
+import static team3.src.message.ErrorMessage.*;
 import static team3.src.message.client.SimpleMessage.*;
 import static team3.src.message.client.FileGetMessage.*;
 import static team3.src.message.client.FilePutMessage.*;
+import team3.src.message.DeleteMessage;
 import team3.src.message.client.FileGetMessage;
 import team3.src.message.client.FilePutMessage;
 import team3.src.message.client.SimpleMessage;
@@ -23,6 +26,18 @@ public final class ClientMessageFactory{
 	public static final ClientMessageFactory getFactory(){
 		return (singleton!= null)?singleton:(singleton= new ClientMessageFactory());
 	}
+	
+	/**
+	 * Create a delete message
+	 * @param clientID the client doing the deleting
+	 * @param priority how important this operation is
+	 * @param filename the file we want to delete
+	 * @return a new delete message
+	 */
+	public final DeleteMessage createDeleteMessage(String clientID, int priority, String filename){
+	    return buildDeleteMessage(clientID, priority, filename);
+	}
+	
 	/**
 	 * Build a Hello Message
 	 * @param clientID

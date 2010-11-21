@@ -17,6 +17,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class FilePutMessage extends AbstractClientMessage {
 	@XmlAttribute(required=true)
 	private String filename;
+	@XmlAttribute(required=true)
+	private boolean isInit;
 	@XmlElement()
 	private String data;
 	@XmlElement()
@@ -25,6 +27,22 @@ public class FilePutMessage extends AbstractClientMessage {
 	private int chunkSize;
 	@XmlElement()
 	private boolean isLast;
+	
+	/**
+	 * Gets the filename associated with this FilePut
+	 * @return a filename string
+	 */
+	public String getFilename(){
+	    return filename;
+	}
+	
+	/**
+	 * Check to see if this is an init message
+	 * @return true if it is, false otherwise
+	 */
+	public boolean isInitMsg(){
+	    return isInit;
+	}
 	/*
 	 * For the following methods, these should only be called
 	 * iff (THAT MEANS IF AND ONLY IF) we have previously accepted
@@ -60,10 +78,12 @@ public class FilePutMessage extends AbstractClientMessage {
 		if(data == null) throw new AssertionError("You tried to call isLast on a message with no data!!!");
 		return isLast;
 	}
-	
+	/**
+	 * ONLY SHOULD BE CALLED IF DATA MESSAGE
+	 */
 	public String read() {
-		//Data will be null on request for file put.
-		return (data== null)?filename:data;
+		if(data == null) throw new AssertionError("TRIED TO READ DATA FROM INIT MSG!!");
+		return data;
 	}
 	
 	public String toString(){
@@ -87,6 +107,7 @@ public class FilePutMessage extends AbstractClientMessage {
 	private FilePutMessage(String clientID, String filename, int priority){
 		super(clientID, priority);
 		this.filename = filename;
+		this.isInit = true;
 	}
 	
 	private FilePutMessage(String clientID, String filename, int priority, String data, int chunkNo, int chunkSize, boolean isLast){
@@ -96,6 +117,7 @@ public class FilePutMessage extends AbstractClientMessage {
 		this.chunkNo = chunkNo;
 		this.chunkSize = chunkSize;
 		this.isLast = isLast;
+		this.isInit = false;
 	}
 	private FilePutMessage(){}
 	
