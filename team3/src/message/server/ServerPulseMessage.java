@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import team3.src.message.Message;
 
 @XmlRootElement(name="PulseMessage")
-@Message(Message.Type.ATOMIC)
+@Message(Message.Type.PULSE)
 public final class ServerPulseMessage extends AbstractServerMessage {
 
     @XmlAttribute(required=true)

@@ -30,5 +30,12 @@ public abstract class AbstractResponse implements IResponse {
         Unmarshaller u = jc.createUnmarshaller();
         return (AbstractResponse) u.unmarshal(inputStream); 
     }
-
+	
+	/**
+	 * Get the type of this response
+	 * @return response type
+	 */
+	public Response.Type getType(){
+	    return this.getClass().getAnnotation(Response.class).value();
+	}
 }

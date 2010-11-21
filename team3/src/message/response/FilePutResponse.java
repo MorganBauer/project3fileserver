@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement(name="FilePutResponse")
-@Response(Response.Type.DATA)
+@Response(Response.Type.DATA_OUT)
 public class FilePutResponse extends AbstractResponse {
 
     //TODO: FINISH THIS UP... 
@@ -23,6 +23,10 @@ public class FilePutResponse extends AbstractResponse {
         return filename;
     }
 
+    public String toString(){
+        return String.format("Response to File Put on %s", filename);
+    }
+    
     private FilePutResponse(){ }
     
     private FilePutResponse(String filename){

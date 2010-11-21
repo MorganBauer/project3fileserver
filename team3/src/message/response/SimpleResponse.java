@@ -3,7 +3,11 @@ package team3.src.message.response;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
+/**
+ * 
+ * @author Joir-dan Gumbs
+ *
+ */
 @XmlRootElement(name="SimpleResponse")
 @Response(Response.Type.END)
 public final class SimpleResponse extends AbstractResponse {
@@ -21,6 +25,10 @@ public final class SimpleResponse extends AbstractResponse {
         return directory;
     }
     
+    public String toString(){
+        return String.format("%s response message", message);
+    }
+    
     private SimpleResponse(){ }
     
     private SimpleResponse(String message){
@@ -35,7 +43,7 @@ public final class SimpleResponse extends AbstractResponse {
         return new SimpleResponse("Hello");
     }
     public static SimpleResponse buildResponseTerminate(){
-        return new SimpleResponse("See ya!");
+        return new SimpleResponse("Terminate");
     }
     public static SimpleResponse buildResponseDirList(String [] dir){
         return new SimpleResponse(dir);

@@ -8,7 +8,7 @@ public class MessageTests {
         TestSuite suite = new TestSuite(MessageTests.class.getName());
         //$JUnit-BEGIN$
         suite.addTestSuite(ClientMessageFactoryTest.class);
-        suite.addTestSuite(SimpleMessageTest.class);
+        suite.addTestSuite(ServerResponseFactoryTest.class);
         //$JUnit-END$
         return suite;
     }

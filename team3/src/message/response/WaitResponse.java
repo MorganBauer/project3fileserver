@@ -19,6 +19,10 @@ public final class WaitResponse extends AbstractResponse {
         throw new AssertionError("NOTHING TO BE READ IN WAIT RESPONSE!!");
     }
     
+    public String toString(){
+        return "Waiting...";
+    }
+    
     private WaitResponse(){}
     
     /**

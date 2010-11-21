@@ -6,6 +6,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import team3.src.message.AbstractMessage;
 
+/**
+ * 
+ * @author Joir-dan Gumbs
+ *
+ */
 @XmlRootElement(name="ErrorResponse")
 @Response(Response.Type.ERROR)
 public class ErrorResponse extends AbstractResponse{
