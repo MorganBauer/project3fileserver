@@ -105,7 +105,7 @@ public class Server extends AbstractServer {
 							+ client.getReceiveBufferSize());
 
 					// setting cipersuites
-					/*
+					///*
 					{
 						// Pick all AES algorithms of 256 bits key size
 						String patternString = ".*AES.*";
@@ -139,7 +139,7 @@ public class Server extends AbstractServer {
 							System.out.println(str[i]);
 						System.out.println("Using cipher suite: "
 								+ ((client).getSession()).getCipherSuite());
-					}*/
+					}//*/
 
 					message = AbstractClientMessage
 							.unmarshal(getMessage(client));
