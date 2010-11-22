@@ -23,6 +23,9 @@ import team3.src.message.response.AbstractResponse;
 import team3.src.protocol.ClientProtocol;
 import team3.src.util.ConfigData;
 
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+
 public class AbstractClient {
     /** Config.ini wrapper object containing data for initialization purposes. */
     protected static ConfigData configData;
@@ -168,7 +171,10 @@ public class AbstractClient {
         /** A config.ini wrapper containing initialization data. */
         protected ConfigData data;
         /** The communication socket. */
-        protected Socket serverSocket;
+        //protected Socket serverSocket;
+        SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+        SSLSocket sslsocket;// = (SSLSocket) sslsocketfactory.createSocket("localhost", Integer.parseInt(arstring[0]));
+
         /** The instream for the client from the server. */
         private BufferedReader clientIn;
         /** The outstream for the client to the server. */
@@ -273,9 +279,11 @@ public class AbstractClient {
          * @throws IOException if we cannot gain access to serverSocket I/O streams
          */
         protected void initConnection() throws UnknownHostException, IOException{
-            serverSocket = new Socket(getHost(), getPort()); 
-            clientIn = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
-            clientOut = new PrintWriter(serverSocket.getOutputStream());
+        	sslsocket = (SSLSocket) sslsocketfactory.createSocket(getHost(), getPort());
+            //serverSocket = new Socket(getHost(), getPort()); 
+        	//clientIn = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
+        	clientIn = new BufferedReader(new InputStreamReader(sslsocket.getInputStream()));
+            clientOut = new PrintWriter(sslsocket.getOutputStream());
         }
         
         /**
@@ -285,7 +293,7 @@ public class AbstractClient {
             try{
                 clientIn.close();
                 clientOut.close();
-                serverSocket.close();
+                sslsocket.close();
             }catch(IOException e){/* We will ignore */ }
             
         }
