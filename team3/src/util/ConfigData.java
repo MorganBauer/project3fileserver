@@ -1,4 +1,6 @@
 package team3.src.util;
+import team3.src.util.ServerInformation;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -6,6 +8,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -80,6 +84,56 @@ public class ConfigData{
 		out.println(data.toString());
 		data = overrideConfigData(args[0]);
 		out.println(data.toString());
+	}
+
+	public LinkedHashMap<Integer,ServerInformation> generateServerInformationSet()
+	{
+		// we have a haspmap containing entries such as
+		// server-hostname#, where # is literally a number, of any size, not padded on left.
+		//    this is matched with a string representing the hostname
+		// server-port#, same
+		//    this is matched with an integer representing the port number
+		LinkedHashMap<Integer,ServerInformation> servers = new LinkedHashMap<Integer,ServerInformation>();
+		
+		for (Map.Entry<String, String> e : configData.entrySet()) {
+			String k = e.getKey();
+			String v = e.getValue();
+			out.println("K is "+ k);
+			if (!k.equals("chunk-size"))
+			{
+				// k is either a server hostname or a server port
+				// need to match up hostnames and ports.
+				if(k.matches(".*hostname.*"))
+				{
+					out.println("found a hostname");
+					// number is going to be at end starting in the 15th position
+					Integer serverNumber = Integer.parseInt(k.substring(15));
+					ServerInformation si = servers.get(serverNumber);
+					if (si == null)
+					{
+						si = new ServerInformation();
+					}
+					si.serverHostName = v;
+					servers.put(serverNumber, si);
+					
+				}
+				else
+				{
+					out.println("found a port number");
+					// number is going to be at end starting in the 15th position
+					int serverNumber = Integer.parseInt(k.substring(11));
+					ServerInformation si = servers.get(serverNumber);
+					if (si == null)
+					{
+						si = new ServerInformation();
+					}
+					si.serverPortNumber = Integer.parseInt(v);
+					servers.put(serverNumber, si);
+				}
+			}
+		}
+		out.println(servers);
+		return servers;
 	}
 	/**
 	 * 
