@@ -1,6 +1,9 @@
 package team3.src.util;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -78,7 +81,35 @@ public class ConfigData{
 		data = overrideConfigData(args[0]);
 		out.println(data.toString());
 	}
-	
+	/**
+	 * 
+	 * @return
+	 */
+	public String generateConfigDataAsWritableString()
+	{
+		StringBuilder sb = new StringBuilder();
+		for (Map.Entry<String, String> e : configData.entrySet()) {
+			String k = e.getKey();
+			String v = e.getValue();
+			sb.append(k).append(": ").append(v).append("\n");
+		}
+		// final newline so we can always add more by appending.
+		return sb.toString();
+	}
+	/**
+	 * This writes the data for servers and clients.
+	 * They are not in any order as a result of using a Map.
+	 * @param args filename - for external config.ini
+	 * @throws IOException 
+	 */
+	public void writeConfigData (String filename) throws IOException
+	{
+		BufferedWriter bw = new BufferedWriter(new FileWriter(new File(filename)));
+		String s = generateConfigDataAsWritableString();
+		bw.write(s); // write to file
+		bw.flush(); // ensure data is written
+		bw.close(); // release file handle
+	}
 	/**
 	 * Returns string representing contents of ConfigData
 	 */
