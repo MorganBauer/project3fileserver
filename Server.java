@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.PriorityBlockingQueue;
 
+import javax.net.ssl.SSLServerSocketFactory;
 import javax.xml.bind.JAXBException;
 
 import team3.src.message.Message;
@@ -18,6 +19,10 @@ import team3.src.message.response.Response;
 import team3.src.protocol.ServerClientProtocol;
 import team3.src.server.AbstractServer;
 import static java.lang.System.out;
+//SSL 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocket;
 
 /**
  * Priority based server implementation
@@ -56,18 +61,21 @@ public class Server extends AbstractServer {
      * @param args
      */
     public static void main(String[] args) {
-        Socket client;
+    	SSLServerSocketFactory sslserversocketfactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+    	Socket client;
         PrioritySocket newSocket;
         PriorityServerThread socketConsumer = new PriorityServerThread();
+
         AbstractClientMessage message;
         try{
             out.println("Accepting connections!");
-            socket = new ServerSocket(41152);
+            //socket = new ServerSocket(41152);
+            sslserversocket = (SSLServerSocket) sslserversocketfactory.createServerSocket(41152);
             out.println("Server Socket Initialized");
             socketConsumer.start();
             while(isRunning()){
                 try{
-                    client = socket.accept();
+                    client = sslserversocket.accept();
                     message = AbstractClientMessage.unmarshal(getMessage(client));
                     out.println(message.toString());
                     newSocket = PrioritySocket.wrapSocket(client, message);
