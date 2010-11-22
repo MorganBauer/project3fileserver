@@ -27,8 +27,8 @@ public class IntraServerProtocol extends AbstractProtocol {
     private int chunkNo;
     private int chunkSize;
     
-    public static final IntraServerProtocol getProtocol(String id, int chunkSize){
-        return new IntraServerProtocol(id, chunkSize);
+    public static final IntraServerProtocol getProtocol(String id, int port, int chunkSize){
+        return new IntraServerProtocol(id, port, chunkSize);
     }
     
     public AbstractResponse generateResponse(AbstractMessage msg){
@@ -73,8 +73,8 @@ public class IntraServerProtocol extends AbstractProtocol {
         return responseFactory.createErrorMessage(id, msg, FILE_NOT_FOUND, "File couldn't be found");    
     }
     
-    private IntraServerProtocol(String id, int chunkSize) {
-        super(id);
+    private IntraServerProtocol(String id, int port,  int chunkSize) {
+        super(id+":"+port);
         this.chunkSize = chunkSize;
     }
     

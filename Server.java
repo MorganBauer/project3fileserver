@@ -8,6 +8,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 
 import javax.xml.bind.JAXBException;
 
+import team3.src.message.AbstractMessage;
 import team3.src.message.Message;
 import team3.src.message.client.AbstractClientMessage;
 import team3.src.message.client.FilePutMessage;
@@ -15,6 +16,8 @@ import team3.src.message.response.AbstractResponse;
 import team3.src.message.response.FileGetResponse;
 import team3.src.message.response.FilePutResponse;
 import team3.src.message.response.Response;
+import team3.src.message.response.server.ServerReplicationResponse;
+import team3.src.protocol.IntraServerProtocol;
 import team3.src.protocol.ServerClientProtocol;
 import team3.src.server.AbstractServer;
 import static java.lang.System.out;
@@ -34,6 +37,8 @@ public class Server extends AbstractServer {
      */
     private static ServerClientProtocol protocol = ServerClientProtocol.getProtocol("");
     
+    private static IntraServerProtocol serverProtocol = IntraServerProtocol.getProtocol(getHostname(), port, 1024);
+    
     /**
      * Gets message from the client
      * @param client
@@ -44,7 +49,8 @@ public class Server extends AbstractServer {
         BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
         return reader.readLine();
     }
-    
+
+
     private static void sendWait(Socket client, AbstractResponse msg) throws IOException{
         PrintWriter writer = new PrintWriter(client.getOutputStream());
         writer.println(msg);
@@ -53,16 +59,31 @@ public class Server extends AbstractServer {
     
     /**
      * Main thread of execution...
-     * @param args
+     * 
+     * @param args one arg
      */
     public static void main(String[] args) {
+        getServerEnvironment();
+        initData();
+        updateFileTable();
+        printFileTable();
+        port = 41152;
+        if(args.length == 1){
+            try{
+                port = Integer.parseInt(args[0]);    
+            }catch(NumberFormatException e){
+                out.println("Unable to find port");
+                throw new AssertionError("Bad Port Num");
+            }
+        }
         Socket client;
         PrioritySocket newSocket;
         PriorityServerThread socketConsumer = new PriorityServerThread();
         AbstractClientMessage message;
         try{
             out.println("Accepting connections!");
-            socket = new ServerSocket(41152);
+            out.format("Hostname: %s. Port: %d\n", getHostname(), port);
+            socket = new ServerSocket(port);
             out.println("Server Socket Initialized");
             socketConsumer.start();
             while(isRunning()){
@@ -285,7 +306,7 @@ public class Server extends AbstractServer {
          */
         private class WorkerThread extends AbstractServerThread{
             private PrioritySocket socket;
-            private AbstractClientMessage message;
+            private AbstractMessage message;
             private ServerClientProtocol protocol;
             
             private WorkerThread(PrioritySocket pSocket){
@@ -342,6 +363,20 @@ public class Server extends AbstractServer {
                                 }
                                 if(response.getType() == Response.Type.ERROR) prepareToFinish();
                                 break;
+                            case UPDATE:
+                                response = null;
+                                break;
+                            case REPLICATE:
+                                response = serverProtocol.generateResponse(message);
+                                if(((ServerReplicationResponse) response).isLast()){
+                                    out.println("Last Server Replication Message");
+                                    prepareToFinish();
+                                }
+                                break;
+                            case VOTE:
+                                response = serverProtocol.generateResponse(message);
+                                break;
+                                
                             default:
                                 response = null;
                                 prepareToFinish();
