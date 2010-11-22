@@ -16,6 +16,17 @@ public class FilePutResponse extends AbstractResponse {
     @XmlAttribute(required=true)
     private String filename;
     
+    @XmlAttribute(required=true)
+    private boolean isLast;
+    
+    /**
+     * 
+     * @return true if last msg was received, false otherwise
+     */
+    public boolean isLast(){
+        return isLast;
+    }
+    
     /**
      * Returns the filename
      */
@@ -29,7 +40,7 @@ public class FilePutResponse extends AbstractResponse {
     
     private FilePutResponse(){ }
     
-    private FilePutResponse(String filename){
+    private FilePutResponse(String filename, boolean isLast){
     	this.filename = filename;
     }
     /**
@@ -37,7 +48,7 @@ public class FilePutResponse extends AbstractResponse {
      * @param filename file that we are putting 
      * @return a response object
      */
-    public static FilePutResponse buildFilePutResponse(String filename){
-    	return new FilePutResponse(filename);
+    public static FilePutResponse buildFilePutResponse(String filename, boolean isLast){
+    	return new FilePutResponse(filename, isLast);
     }
 }

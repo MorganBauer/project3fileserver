@@ -78,8 +78,10 @@ public class Client extends AbstractClient {
             for(String arg : commandArgs) init+=arg+" ";
             try{
                 toServer = protocol.handleInput(commandArgs, getName());
+                initConnection();
                 //printFriendly = protocol.stripData(toServer);
                 //logger.log(printFriendly);
+                out.println(toServer);
                 writeToServer(toServer);
                 while(weCantStop()){
                     try{
@@ -87,13 +89,20 @@ public class Client extends AbstractClient {
                         switch(fromServer.getType()){
                             case ERROR:
                             case END:
+                                out.println("ATOMIC!!!");
+                                out.println(fromServer);
                                 toServer = null;
                                 protocol.handleSimpleResponse(fromServer);
                                 prepareToFinish();
                                 break;
                             case DATA_IN:
                             case DATA_OUT:
+                                out.println("Data Message!!");
                                 toServer = protocol.handleNext(fromServer);
+                                if(toServer == null){
+                                    out.println("No response...");
+                                    prepareToFinish();
+                                }
                                 break;
                             case WAIT:
                                 toServer = null;
@@ -101,22 +110,28 @@ public class Client extends AbstractClient {
                                 break;
                             default: throw new AssertionError("SOMEONE MESSED UP!! UNKNOWN RESPONSE");
                         }
-                        if(toServer!= null)
-                            //TODO: Log events
+                        if(toServer!= null){
+                            out.println(toServer);
                             writeToServer(toServer);
+                            out.println("sent msg!");
+                        }
                     }catch(IOException e){ 
                         //TODO: LOGGER!
                         prepareToFinish();
                     }catch(JAXBException e){
                         //TODO: Logger!
+                        e.printStackTrace();
+                        out.println("HEY!!!");
                         prepareToFinish();
                     }
                 }
-            }catch(IllegalCommandException e){ 
+            }catch(IOException e){ out.println("Unable to connect..."); }
+            catch(IllegalCommandException e){ 
                 //TODO: Logger
                 out.println("Bad Command");
             }catch(JAXBException e){
                 //TODO: Logger
+                e.printStackTrace();
                 out.println("JAXBException... do somethign about this...");
             }
             closeConnection();

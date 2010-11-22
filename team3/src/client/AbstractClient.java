@@ -207,7 +207,7 @@ public class AbstractClient {
             this.commandArgs = message;
             this.filename = filename;
             this.maxChunkSize = Integer.parseInt(data.get("chunk-size"));
-            initConnection();
+            
             //TODO: logger.log("Logger initialized for ClientThread: "+requestID);
         }
         
@@ -217,7 +217,8 @@ public class AbstractClient {
          * @throws IOException if unable to read from in-stream buffer
          */
         protected AbstractResponse grabFromServer() throws IOException, JAXBException{
-            return AbstractResponse.unmarshal(clientIn.readLine());
+            String message = clientIn.readLine();
+            return AbstractResponse.unmarshal(message);
         }
         
         /**
@@ -246,7 +247,7 @@ public class AbstractClient {
          * @throws NumberFormatException This means our config.ini file is corrupted
          */
         private int getPort() throws NumberFormatException{
-            return Integer.parseInt(data.get("server-port"));
+            return Integer.parseInt(data.get("server-port1"));
         }
         
         /**
@@ -263,7 +264,7 @@ public class AbstractClient {
          * @return hostname the name of the host
          */
         private String getHost(){
-            return data.get("server-hostname");
+            return data.get("server-hostname1");
         }
         
         /**

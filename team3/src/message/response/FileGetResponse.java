@@ -1,5 +1,7 @@
 package team3.src.message.response;
 
+import java.io.UnsupportedEncodingException;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -52,13 +54,16 @@ public final class FileGetResponse extends AbstractResponse {
     
     public String read() { return base64data; }
     
-    private FileGetResponse(){
+    private FileGetResponse(){}
+    
+    private FileGetResponse(String filename){
         this.isData = false;
         this.isLast = false;
-        this.base64data = "READY";
+        this.base64data = filename;
     }
     private FileGetResponse( String data, int chunkSize, boolean isLast){
-        this.base64data = data;
+        try { this.base64data = java.net.URLEncoder.encode(data,"UTF-8");
+        } catch (UnsupportedEncodingException e) { e.printStackTrace(); }
         this.chunkSize = chunkSize;
         this.isData = true;
         this.isLast = isLast;
@@ -67,8 +72,8 @@ public final class FileGetResponse extends AbstractResponse {
      * Build an initialization response to a File get command
      * @return new FileGetResponse
      */
-    public static final FileGetResponse buildFileGetInitResponse(){
-        return new FileGetResponse();
+    public static final FileGetResponse buildFileGetInitResponse(String filename){
+        return new FileGetResponse(filename);
     }
     /**
      * Build a data response to a FileGet Command

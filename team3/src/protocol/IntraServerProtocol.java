@@ -76,7 +76,6 @@ public class IntraServerProtocol extends AbstractProtocol {
     private IntraServerProtocol(String id, int chunkSize) {
         super(id);
         this.chunkSize = chunkSize;
-        // TODO Auto-generated constructor stub
     }
     
     //TODO: THIS MAY NEED TO BE EDITED A BIT later

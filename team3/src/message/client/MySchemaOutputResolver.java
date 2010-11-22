@@ -1,4 +1,4 @@
-package team3.src.message.response;
+package team3.src.message.client;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,11 +27,8 @@ public class MySchemaOutputResolver extends SchemaOutputResolver {
 	 * @throws JAXBException 
 	 */
 	public static void main(String[] args) throws IOException, JAXBException{
-		JAXBContext context = JAXBContext.newInstance(AbstractResponse.class.getPackage().getName());
+		JAXBContext context = JAXBContext.newInstance(AbstractClientMessage.class.getPackage().getName());
 		context.generateSchema(new MySchemaOutputResolver());
-		String data = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><SimpleResponse message=\"Directory\"><directory>.classpath</directory><directory>.DS_Store</directory><directory>.hg</directory></SimpleResponse>";
-		AbstractResponse.unmarshal(data);
-		System.out.println(data);
 	}
 
 }

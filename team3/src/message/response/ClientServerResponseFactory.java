@@ -38,8 +38,8 @@ public class ClientServerResponseFactory {
 	 * Create a FileGet initial response message
 	 * @return new response
 	 */
-	public final FileGetResponse createFileGetInitResponse(){
-		return buildFileGetInitResponse();
+	public final FileGetResponse createFileGetInitResponse(String filename){
+		return buildFileGetInitResponse(filename);
 	}
 	/**
 	 * Creates a File Get data Response message
@@ -56,8 +56,8 @@ public class ClientServerResponseFactory {
 	 * @param filename the file the client wants to add/update
 	 * @return new response object
 	 */
-	public final FilePutResponse createFilePutResponse(String filename){
-	    return buildFilePutResponse(filename);
+	public final FilePutResponse createFilePutResponse(String filename, boolean isLast){
+	    return buildFilePutResponse(filename, isLast);
 	}
 	/**
 	 * Creates a wait response message for the client

@@ -19,14 +19,15 @@ public class FilePutMessage extends AbstractClientMessage {
 	private String filename;
 	@XmlAttribute(required=true)
 	private boolean isInit;
+	@XmlAttribute(required=true)
+    private boolean isLast;
 	@XmlElement()
 	private String data;
 	@XmlElement()
 	private int chunkNo;
 	@XmlElement()
 	private int chunkSize;
-	@XmlElement()
-	private boolean isLast;
+	
 	
 	/**
 	 * Gets the filename associated with this FilePut
@@ -75,7 +76,6 @@ public class FilePutMessage extends AbstractClientMessage {
 	 * @return true if last chunk, false otherwise
 	 */
 	public boolean isLast(){
-		if(data == null) throw new AssertionError("You tried to call isLast on a message with no data!!!");
 		return isLast;
 	}
 	/**
@@ -94,7 +94,7 @@ public class FilePutMessage extends AbstractClientMessage {
 		return String.format("File Put from %s\nRequesting to upload: %s", getID(), filename);
 	}
 	private String toStringData(){
-		return String.format("File Put from %s\nUploading chunk %d of %s\nSize of chunk is %d", getID(), chunkNo, filename, chunkSize);
+		return String.format("File Put from %s\nUploading chunk %d of %s\nSize of chunk is %d. IS LAST = %b", getID(), chunkNo, filename, data.length(), isLast);
 	}
 	
 	public static FilePutMessage buildFilePutRequestMessage(String clientID, String filename, int priority){
@@ -108,6 +108,7 @@ public class FilePutMessage extends AbstractClientMessage {
 		super(clientID, priority);
 		this.filename = filename;
 		this.isInit = true;
+		this.isLast = false;
 	}
 	
 	private FilePutMessage(String clientID, String filename, int priority, String data, int chunkNo, int chunkSize, boolean isLast){

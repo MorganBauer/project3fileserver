@@ -25,9 +25,6 @@ public class SimpleMessage extends AbstractClientMessage {
 	@XmlElement
 	private int numFiles;
 	
-	
-	
-	public String getMessage(){ return message; }
 	public int getStart(){ return start; }
 	public int getNumFiles(){ return numFiles; }
 	

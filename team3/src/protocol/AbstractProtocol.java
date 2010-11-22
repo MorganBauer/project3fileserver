@@ -57,6 +57,7 @@ public abstract class AbstractProtocol {
      */
     protected boolean exists(String filename){
         File file = new File(filename);
+        System.out.println(file.exists());
         return file.exists();
     }
 	

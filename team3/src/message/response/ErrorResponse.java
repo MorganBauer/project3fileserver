@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import team3.src.message.AbstractMessage;
+import team3.src.message.Message;
 
 /**
  * 
@@ -45,7 +46,7 @@ public class ErrorResponse extends AbstractResponse{
 	private ErrorResponse(String id, AbstractMessage sentMsg, String ecode, String details){
 		this.id = id;
 		this.code = ecode;
-		this.originMsgType = sentMsg.getClass().getAnnotation(Response.class).value().toString();
+		this.originMsgType = sentMsg.getClass().getAnnotation(Message.class).value().toString();
 		this.details=details;
 	}
 	

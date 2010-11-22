@@ -225,9 +225,18 @@ public final class ClientProtocol extends AbstractProtocol{
            chunkNo = 0;
            outfile = msg.read();
        }
+       out.println(msg);
+       if(msg.isLast()){
+           out.println(msg);
+           out.println("Msg is Last");
+           return null;
+       }
        try{
-           String encoded = dataToMsgUtil.data2Base64(msg.read(), chunkNo++, chunkSize, false);
-           return messageFactory.createFilePutMessage(id, outfile, priority, encoded, chunkNo-1, chunkSize, (((4/3)*encoded.length())/KILOBYTE < chunkSize));
+           String encoded = dataToMsgUtil.data2Base64(msg.read(), chunkNo++, chunkSize, true);
+           if(encoded == null) return null;
+           out.println(encoded.length()/KILOBYTE);
+           out.println((((4/3)*encoded.length()/KILOBYTE) < chunkSize));
+           return messageFactory.createFilePutMessage(id, outfile, priority, java.net.URLEncoder.encode(encoded,"UTF-8"), chunkNo-1, chunkSize, ((4/3)*encoded.length()/KILOBYTE < chunkSize));
        }catch(FileNotFoundException e){
            out.println("Can't find file for transmitting");
            return messageFactory.createErrorMessage(id, msg, FILE_NOT_FOUND, "Unable to find file to transmit");
@@ -256,7 +265,6 @@ public final class ClientProtocol extends AbstractProtocol{
    private AbstractMessage firstNextFileGet(FileGetResponse msg){
        infile = msg.read();
        outfile = String.format("%s-%s", id, infile);
-       
        File file = new File(String.format("%s-%s", id, infile));
        try{
            file.createNewFile();
@@ -274,8 +282,10 @@ public final class ClientProtocol extends AbstractProtocol{
     */
    private AbstractMessage nextFileGet(FileGetResponse msg){
        try{
-           dataToMsgUtil.base64toData(String.format("%s-%s", id, infile), msg.read());
+           out.println(outfile);
+           out.println(dataToMsgUtil.base64toData(outfile, java.net.URLDecoder.decode(msg.read(),"UTF-8")));
            if(msg.isLast()){
+               out.println("LAST!!");
                if(exists(infile)) delete(infile);
                if(rename(outfile)) return null;
                else out.println("Corruption ERROR.");
