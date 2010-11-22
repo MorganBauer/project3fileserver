@@ -52,7 +52,7 @@ public abstract class AbstractMessage implements IMessage {
 		this.datetime = factory.newXMLGregorianCalendar(now);
 	}
 	
-	   /**
+	/**
      * Converts xml message into a message object 
      * @param xml - Message received from client (or other servers)
      * @return IMessage object

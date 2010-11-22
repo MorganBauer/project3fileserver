@@ -6,7 +6,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 
 import static java.lang.System.out;
@@ -28,6 +30,7 @@ public class ConfigData{
 		return (singleton == null)? generateConfigData(): singleton;
 	}
 	
+	
 	/**
 	 * Creates a special ConfigData object based on an external config.ini file
 	 * @param filename The absolute path to the external config.ini file
@@ -48,6 +51,25 @@ public class ConfigData{
 	 * @param value Value associated with identifier
 	 */
 	public void set(String key, String value){ configData.put(key, value); }
+	
+	public void removeServer(String host, int port){
+	    Iterator<Entry<String, String>> iter = configData.entrySet().iterator();
+	    int num = 0;
+	    while(iter.hasNext()){
+	        Entry<String, String> pair = iter.next();
+	        out.println(pair.getKey());
+	        if(pair.getKey().startsWith("server-hostname")){
+	            num = Integer.parseInt(Character.toString((pair.getKey().toCharArray()[pair.getKey().length()-1])));
+	            if(pair.getValue().equals(host)){
+	                if(Integer.parseInt(configData.get("server-port"+num)) == port){
+	                    iter.remove();
+	                    break;
+	                }
+	            }
+	        }
+	    }
+	    configData.remove("server-port"+num);
+	}
 	
 	private ConfigData(){ configData = new HashMap<String, String>(); }
 	
@@ -78,7 +100,7 @@ public class ConfigData{
 	public static void main(String args[]) throws IOException{
 		ConfigData data = getConfigData();
 		out.println(data.toString());
-		data = overrideConfigData(args[0]);
+		data.removeServer("localhost", 41152);
 		out.println(data.toString());
 	}
 	/**
