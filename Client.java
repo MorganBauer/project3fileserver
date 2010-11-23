@@ -35,7 +35,11 @@ public class Client extends AbstractClient {
                 String[] commandArgs = testIsNotFirstRequest()? parseCommand(): parseCommand(args);
                 if(commandArgs[0].equals("my directory")){ 
                     getDirectory(commandArgs);
-                }else{
+                }
+                else if(commandArgs[0].equals("bye")){
+                    thenClientIsDone();   
+                }
+                else{
                     if(commandArgs[0].equals("terminate")) thenClientIsDone();
                     ClientThread clientThread = ClientThread.createThread(generateRequestID(), configData, commandArgs);
                     clientThread.start(); 
