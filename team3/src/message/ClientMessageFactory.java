@@ -23,7 +23,7 @@ public final class ClientMessageFactory{
 	 * Grabs the factory for making client messages
 	 * @return a factory
 	 */
-	public static final ClientMessageFactory getFactory(){
+	public static final synchronized ClientMessageFactory getFactory(){
 		return (singleton!= null)?singleton:(singleton= new ClientMessageFactory());
 	}
 	

@@ -194,7 +194,7 @@ public class Server extends AbstractServer {
          * Gets the priority handling thread for this server
          * @return priority server thread
          */
-        public static final PriorityServerThread getThread(){
+        public static final synchronized PriorityServerThread getThread(){
             return (singleton !=null)?singleton:(singleton = new PriorityServerThread());
         }
         
