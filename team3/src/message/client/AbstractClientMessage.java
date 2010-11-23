@@ -39,16 +39,4 @@ public abstract class AbstractClientMessage extends AbstractMessage  {
 	}
 	protected AbstractClientMessage(){ }
 	
-	/**
-     * Converts xml message into a message object 
-     * @param xml - Message received from client (or other servers)
-     * @return IMessage object
-     * @throws JAXBException  if unable to convert
-     */
-    public static AbstractClientMessage unmarshal(String xml) throws JAXBException{
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(xml.getBytes());
-        JAXBContext jc = JAXBContext.newInstance(AbstractClientMessage.class.getPackage().getName());
-        Unmarshaller u = jc.createUnmarshaller();
-        return (AbstractClientMessage) u.unmarshal(inputStream); 
-    }
 }

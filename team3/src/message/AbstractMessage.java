@@ -2,6 +2,7 @@ package team3.src.message;
 
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.GregorianCalendar;
 
@@ -14,6 +15,9 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import team3.src.message.client.AbstractClientMessage;
+import team3.src.message.server.AbstractServerMessage;
+
 
 @Message(Message.Type.UNKNOWN)
 public abstract class AbstractMessage implements IMessage {
@@ -23,7 +27,7 @@ public abstract class AbstractMessage implements IMessage {
 		catch(DatatypeConfigurationException e){  throw new AssertionError("Couldnt instantiate DatatypeFactory"); }
 	}
 	private static DatatypeFactory factory;
-	private static GregorianCalendar now = new GregorianCalendar();
+	private GregorianCalendar now = new GregorianCalendar();
 	@XmlAttribute(required=true)
 	private XMLGregorianCalendar datetime;
 	
@@ -60,7 +64,8 @@ public abstract class AbstractMessage implements IMessage {
      */
     public static AbstractMessage unmarshal(String xml) throws JAXBException{
         ByteArrayInputStream inputStream = new ByteArrayInputStream(xml.getBytes());
-        JAXBContext jc = JAXBContext.newInstance(AbstractMessage.class.getPackage().getName());
+        JAXBContext jc = JAXBContext.newInstance(
+                String.format("%s:%s:%s",AbstractMessage.class.getPackage().getName(), AbstractClientMessage.class.getPackage().getName(), AbstractServerMessage.class.getPackage().getName()));
         Unmarshaller u = jc.createUnmarshaller();
         return (AbstractMessage) u.unmarshal(inputStream); 
     }

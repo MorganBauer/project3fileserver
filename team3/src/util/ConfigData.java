@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
@@ -19,7 +20,7 @@ public class ConfigData{
 	/** The ConfigData singleton */
 	private static ConfigData singleton = null;
 	/** The map that holds the key-value pairs obtained from config.ini **/
-	private HashMap<String, String> configData;
+	private LinkedHashMap<String, String> configData;
 	
 	/**
 	 * Singleton Method for default ConfigData object
@@ -55,23 +56,52 @@ public class ConfigData{
 	public void removeServer(String host, int port){
 	    Iterator<Entry<String, String>> iter = configData.entrySet().iterator();
 	    int num = 0;
+	    boolean match = false;
 	    while(iter.hasNext()){
 	        Entry<String, String> pair = iter.next();
-	        out.println(pair.getKey());
+	        
+	        out.format("Key:%s .Host: %s.\n", pair.getKey(), pair.getValue());
 	        if(pair.getKey().startsWith("server-hostname")){
 	            num = Integer.parseInt(Character.toString((pair.getKey().toCharArray()[pair.getKey().length()-1])));
-	            if(pair.getValue().equals(host)){
+	            out.println(host.length());
+	            
+	            out.println(pair.getValue().length());
+	            out.println(String.format("Config.ini hostname: %s. getHostname's hostname: %s", host, pair.getValue()));
+	            if(pair.getValue().compareTo(host) == 0){
+	                out.println(configData.get("server-port"+num));
+	                out.println(port);
 	                if(Integer.parseInt(configData.get("server-port"+num)) == port){
-	                    iter.remove();
+	                    out.println(match);
+	                    match = true;
 	                    break;
 	                }
-	            }
+	            }else out.println("Not equal...");
 	        }
 	    }
-	    configData.remove("server-port"+num);
+	    if(match){
+	        configData.remove("server-hostname"+num);
+	        configData.remove("server-port"+num);
+	    } 
 	}
 	
-	private ConfigData(){ configData = new HashMap<String, String>(); }
+	
+	public HashMap<String, Integer> getServerPorts(){
+	    HashMap<String, Integer> servers=new HashMap<String, Integer>();
+	    Iterator<Entry<String, String>> iter =configData.entrySet().iterator();
+	    int num = 0;
+	    while(iter.hasNext()){
+	        Entry<String, String> pair = iter.next();
+	        if(pair.getKey().startsWith("server-hostname")){
+	            num = Integer.parseInt(Character.toString((pair.getKey().toCharArray()[pair.getKey().length()-1])));
+	            
+	            servers.put(pair.getValue(), Integer.parseInt(configData.get("server-port"+num)));
+	        }
+	    }
+	    return servers;
+	}
+	
+	
+	private ConfigData(){ configData = new LinkedHashMap<String, String>(); }
 	
 	/**
 	 * Method that generates a ConfigData object based on a given ini filename
@@ -151,24 +181,35 @@ public class ConfigData{
 		 * @return HashMap corresponding to key-value pairs within config.ini file
 		 * @throws IOException if our config.ini file can not be found or is corrupted
 		 */
-		private static HashMap<String, String> parseFile(FileReader file) throws IOException{
+		private static LinkedHashMap<String, String> parseFile(FileReader file) throws IOException{
 			String line;
 			Scanner scanner;
-			HashMap<String, String> map = new HashMap<String, String>();
+			LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();
 			BufferedReader configFile = new BufferedReader(file);
 			while((line =configFile.readLine()) != null){
 				scanner = new Scanner(line).useDelimiter(": ");
-				map.put(scanner.next(), scanner.next());
+				map.put(scanner.next(), stripInvalids(scanner.next()));
 			}
 			return map;
 		}
+		
+		private static String stripInvalids(String s){
+		    char[] v = s.toCharArray();
+            StringBuffer b = new StringBuffer();
+            for(char c : v){
+                if(c == '\n'|| c =='\0') break;
+                b.append(Character.toString(c));
+            }
+            return b.toString();
+		}
+		
 		/**
 		 * Overloaded method for reaing in a config.ini file. 
 		 * @param filename Absolute path to config.ini file
 		 * @return HashMap containing key-value pairs for config parameters
 		 * @throws IOException
 		 */
-		public static HashMap<String, String> readFile(String filename) throws IOException{
+		public static LinkedHashMap<String, String> readFile(String filename) throws IOException{
 			return parseFile(new FileReader(filename));
 		}
 		/**
@@ -177,7 +218,7 @@ public class ConfigData{
 		 * @throws IOException if the config.ini file is unable to be found or data is corrupt
 		 */
 		@SuppressWarnings("unused")
-		public static HashMap<String, String> readFile() throws IOException{ return readFile("config.ini"); }
+		public static LinkedHashMap<String, String> readFile() throws IOException{ return readFile("config.ini"); }
 		
 	}
 }

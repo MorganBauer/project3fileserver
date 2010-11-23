@@ -50,7 +50,7 @@ public class ServerResponseFactoryTest extends TestCase {
     
     @Test
     public void testFilePutResponse() throws JAXBException{
-        XML = (s = smf.createFilePutResponse("GatorChomp.mp3")).marshal();
+        XML = (s = smf.createFilePutResponse("GatorChomp.mp3", false)).marshal();
         assertEquals(s.toString(), AbstractResponse.unmarshal(XML).toString());
     }
     
@@ -62,7 +62,7 @@ public class ServerResponseFactoryTest extends TestCase {
     
     @Test
     public void testFileGetResponse() throws JAXBException{
-        XML = (s = smf.createFileGetInitResponse()).marshal();
+        XML = (s = smf.createFileGetInitResponse("STuff")).marshal();
         assertEquals(s.toString(), AbstractResponse.unmarshal(XML).toString());
     }
     
