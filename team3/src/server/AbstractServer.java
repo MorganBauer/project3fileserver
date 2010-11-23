@@ -2,6 +2,7 @@ package team3.src.server;
 
 import static java.lang.System.out;
 import static java.lang.System.getProperty;
+import static java.lang.System.setProperty;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -9,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,13 +19,13 @@ import java.util.concurrent.PriorityBlockingQueue;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-
 import team3.src.message.AbstractMessage;
 import team3.src.message.Message;
 import team3.src.message.client.AbstractClientMessage;
 import team3.src.util.ConfigData;
 import team3.src.util.Triple;
 
+import javax.net.ssl.SSLServerSocket;
 
 /**
  * Abstraction of our server process
@@ -42,19 +42,37 @@ public abstract class AbstractServer {
     /** Flag to check whether the server process is in a runnable state */
     private static volatile Boolean isRunning = true;
     /** Server Listening object. */
-    protected static ServerSocket socket;
+    protected static SSLServerSocket socket;
     /** Port of this server */
     protected static int port;
     /** The hostname of this server*/
     private static String hostname;
+    
+
+    /**
+     * Sets sssl properties... rtfm
+     */
+    protected static final void setSSLProperties(){
+        setProperty("javax.net.ssl.keyStore", "mySrvKeystore");
+        setProperty("javax.net.ssl.keyStorePassword", "123456");
+        setProperty("javax.net.ssl.trustStore", "mySrvKeystore");
+        setProperty("javax.net.ssl.trustStorePassword", "123456");
+    }
     
     private static ConfigData data;
     
     protected static void initData(){
         try { data = ConfigData.getConfigData(); } 
         catch (IOException e) { throw new AssertionError("WHERE IS UR CONFIGDATA FILE??"); }
+        out.println(data);
         removeMe();
+        out.println(data);
+        for(Map.Entry<String, Integer> entry : data.getServerPorts().entrySet()){
+            servers.add(ServerInfo.makeServerInfo(entry.getKey(), entry.getValue()));
+        }
     }
+    
+    
     
     protected static void removeMe(){
         data.removeServer(hostname, port);
@@ -67,6 +85,8 @@ public abstract class AbstractServer {
     protected static ConfigData getData(){ return data; }
     
     protected static HashMap<String, Long> filenameAndDate = new HashMap<String,Long>();
+    protected static ArrayList<ServerInfo> servers = new ArrayList<ServerInfo>();
+    
     
     protected static final void updateFileTable(){
         File dir = new File(getProperty("user.dir"));
@@ -77,15 +97,24 @@ public abstract class AbstractServer {
         for(Map.Entry<String, Long> keyVal:filenameAndDate.entrySet()) out.println(String.format("%s: %d", keyVal.getKey(), keyVal.getValue()));
     }
     
-    protected static void getServerEnvironment(){
+    protected static void getServerEnvironment(String[] args){
         try{
             Runtime run = Runtime.getRuntime();
             Process proc = run.exec( "hostname" );
             BufferedInputStream in = new BufferedInputStream( proc.getInputStream() );
             byte [] b = new byte[256];
             in.read(b);
-            hostname = new String(b).replace('\n', '\0');
-            }catch(IOException e){ throw new AssertionError("U NOT WORKING IN UNIX??"); }
+            StringBuilder str = new StringBuilder();
+            for(byte c : b){
+                if(c =='\n') break;
+                str.append(Character.toString((char)c));
+            }
+            hostname = str.toString();
+       }catch(IOException e){ throw new AssertionError("U NOT WORKING IN UNIX??"); }
+       port = 41152;
+       if(args.length == 1)
+            try{ port = Integer.parseInt(args[0]);  }
+            catch(NumberFormatException e){ throw new AssertionError("Bad Port Num"); }
     }
     
     protected static String getHostname(){
@@ -101,7 +130,7 @@ public abstract class AbstractServer {
         synchronized(isRunning){
             return isRunning;
         }
-    }
+    } 
     
     /** Sets our running flag to false, done to end server. */
     protected static void finished(){ 
@@ -119,16 +148,39 @@ public abstract class AbstractServer {
         }
     }
     
+    protected static ServerInfo getServerInfo(String hostname, int port){
+        for(ServerInfo server : servers)
+            if(server.match(hostname, port))
+                return server;
+        return null;
+    }
+    
     protected static final class ServerInfo{
         private String hostname;
         private int load;
         private int port;
         private HashMap<String, Long> directory;
         
+        public boolean match(String hostname, int port){
+            return (this.hostname.equals(hostname) && this.port == port);
+        }
+        
         public String getHostname(){ return hostname; }
         public int getLoad(){return load;}
         public int getPort(){ return port; }
         public HashMap<String, Long> getDir(){ return directory; }
+        public void updateDirectory(HashMap<String, Long> directory){ this.directory = directory;  }
+        private ServerInfo(String hostname, int port){
+            this.hostname = hostname;
+            this.port = port;
+            this.load = 0;
+        }
+        
+       
+        
+        public static final ServerInfo makeServerInfo(String hostname, int port){
+            return new ServerInfo(hostname, port);
+        }
         
         public Triple<ArrayList<String>,ArrayList<String>,ArrayList<String>> getDiffs(HashMap<String, Long> otherDir, AbstractClientMessage msg){
             ArrayList<String> iHaveRecent = new ArrayList<String>(),
@@ -147,7 +199,6 @@ public abstract class AbstractServer {
             }
             return new Triple<ArrayList<String>,ArrayList<String>,ArrayList<String>>(iHaveRecent, theyHaveRecent, theyHaveIt);
         }
-        
     }
     
    
@@ -256,11 +307,11 @@ public abstract class AbstractServer {
          * @param msg Message that was sent by client
          */
         private PrioritySocket(Socket client, AbstractMessage msg){
-            if(msg.getMsgType() != Message.Type.ATOMIC ||
-               msg.getMsgType() != Message.Type.READ   ||
-               msg.getMsgType() != Message.Type.WRITE  ||
-               msg.getMsgType() != Message.Type.DELETE ||
-               msg.getMsgType() != Message.Type.ERROR )
+            if(msg.getMsgType() == Message.Type.ATOMIC ||
+               msg.getMsgType() == Message.Type.READ   ||
+               msg.getMsgType() == Message.Type.WRITE  ||
+               msg.getMsgType() == Message.Type.DELETE ||
+               msg.getMsgType() == Message.Type.ERROR )
                 this.priority = ((AbstractClientMessage) msg).getPriority();
             else this.priority = 100;
             this.timestamp = msg.getDateTime();

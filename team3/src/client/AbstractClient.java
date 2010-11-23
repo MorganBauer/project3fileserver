@@ -3,6 +3,7 @@ package team3.src.client;
 import static java.lang.System.in;
 import static java.lang.System.out;
 import static java.lang.System.getProperty;
+import static java.lang.System.setProperty;
 import team3.src.exception.IllegalCommandException;
 
 import java.io.BufferedReader;
@@ -10,11 +11,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.Socket;
+//import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBException;
 
@@ -22,6 +25,11 @@ import team3.src.message.AbstractMessage;
 import team3.src.message.response.AbstractResponse;
 import team3.src.protocol.ClientProtocol;
 import team3.src.util.ConfigData;
+import team3.src.util.SSLEncryptor;
+
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 public class AbstractClient {
     /** Config.ini wrapper object containing data for initialization purposes. */
@@ -33,6 +41,7 @@ public class AbstractClient {
     /** True if terminate has not been called, false otherwise. */
     private static boolean isNotDone = true;
     
+    protected static String encrypt = SSLEncryptor.AES;
     
     /**
      * Checks to see whether our client process is done (terminate has been called)
@@ -44,6 +53,11 @@ public class AbstractClient {
      * Sets our isNotDone variable to false, to signal the end of this process
      */
     protected static void thenClientIsDone(){ isNotDone = false; }
+    
+    public static final void setSSLProperties(){
+        setProperty("javax.net.ssl.trustStore", "mySrvKeystore");
+        setProperty("javax.net.ssl.trustStorePassword", "123456");
+    }
     
     /**
      * Initialized the configData object
@@ -168,7 +182,7 @@ public class AbstractClient {
         /** A config.ini wrapper containing initialization data. */
         protected ConfigData data;
         /** The communication socket. */
-        protected Socket serverSocket;
+        protected SSLSocket serverSocket;
         /** The instream for the client from the server. */
         private BufferedReader clientIn;
         /** The outstream for the client to the server. */
@@ -273,7 +287,8 @@ public class AbstractClient {
          * @throws IOException if we cannot gain access to serverSocket I/O streams
          */
         protected void initConnection() throws UnknownHostException, IOException{
-            serverSocket = new Socket(getHost(), getPort()); 
+            serverSocket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(getHost(), getPort()); 
+            serverSocket = SSLEncryptor.encrypt(serverSocket, encrypt, false);
             clientIn = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
             clientOut = new PrintWriter(serverSocket.getOutputStream());
         }

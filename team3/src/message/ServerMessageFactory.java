@@ -66,16 +66,6 @@ public final class ServerMessageFactory{
     public ServerPulseMessage createPulseMessage(String host, int port, int load){
     	return buildPulse(host, port, load);
     }
-    /**
-     * @param host who is sending this
-     * @param port the port of the sender
-     * @param load how many clients are currently enqueue
-     * @param currentDir what the current file directory looks like
-     * @return pulse message
-     */
-    public ServerPulseMessage createPulseWithUpdate(String host, int port, int load, String[] currentDir){
-    	return buildPulseWithUpdate(host, port, load, currentDir);
-    }
     
 	/**
 	 * Builds an error message to be sent back to client or server

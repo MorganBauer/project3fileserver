@@ -25,6 +25,7 @@ public class Client extends AbstractClient {
      * @param args
      */
     public static void main(String[] args) {
+        setSSLProperties();
         out.println("Start!");
         initData();
         //TODO: create Logger initLogger();

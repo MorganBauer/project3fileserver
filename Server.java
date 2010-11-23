@@ -4,8 +4,15 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.PriorityBlockingQueue;
 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import javax.xml.bind.JAXBException;
 
 import team3.src.message.AbstractMessage;
@@ -14,12 +21,16 @@ import team3.src.message.client.AbstractClientMessage;
 import team3.src.message.client.FilePutMessage;
 import team3.src.message.response.AbstractResponse;
 import team3.src.message.response.FileGetResponse;
-import team3.src.message.response.FilePutResponse;
 import team3.src.message.response.Response;
 import team3.src.message.response.server.ServerReplicationResponse;
+import team3.src.message.server.ServerPulseMessage;
 import team3.src.protocol.IntraServerProtocol;
 import team3.src.protocol.ServerClientProtocol;
 import team3.src.server.AbstractServer;
+import team3.src.util.SSLEncryptor;
+
+
+
 import static java.lang.System.out;
 
 /**
@@ -38,6 +49,8 @@ public class Server extends AbstractServer {
     private static ServerClientProtocol protocol = ServerClientProtocol.getProtocol("");
     
     private static IntraServerProtocol serverProtocol = IntraServerProtocol.getProtocol(getHostname(), port, 1024);
+    
+    private static UpdatePulse pulsor;
     
     /**
      * Gets message from the client
@@ -63,34 +76,27 @@ public class Server extends AbstractServer {
      * @param args one arg
      */
     public static void main(String[] args) {
-        getServerEnvironment();
+        setSSLProperties();
+        getServerEnvironment(args);
         initData();
         updateFileTable();
-        printFileTable();
-        port = 41152;
-        if(args.length == 1){
-            try{
-                port = Integer.parseInt(args[0]);    
-            }catch(NumberFormatException e){
-                out.println("Unable to find port");
-                throw new AssertionError("Bad Port Num");
-            }
-        }
-        Socket client;
+        //printFileTable();
+        pulsor = UpdatePulse.getPulsor();
+        SSLSocket client;
         PrioritySocket newSocket;
         PriorityServerThread socketConsumer = new PriorityServerThread();
-        AbstractClientMessage message;
+        AbstractMessage message;
         try{
             out.println("Accepting connections!");
             out.format("Hostname: %s. Port: %d\n", getHostname(), port);
-            socket = new ServerSocket(port);
+            socket = (SSLServerSocket) SSLServerSocketFactory.getDefault().createServerSocket(port);
             out.println("Server Socket Initialized");
             socketConsumer.start();
             while(isRunning()){
                 try{
-                    client = socket.accept();
-                    message = AbstractClientMessage.unmarshal(getMessage(client));
-                    out.println(message.toString());
+                    client = SSLEncryptor.encrypt((SSLSocket) socket.accept(), SSLEncryptor.AES, false);
+                    String msg = getMessage(client);
+                    message = AbstractMessage.unmarshal(msg);
                     newSocket = PrioritySocket.wrapSocket(client, message);
                     // If this is a terminating message, then prevent further client requests from hitting the server
                     if(message.getMsgType() == Message.Type.ATOMIC && message.read().equals("Terminate")){
@@ -120,7 +126,7 @@ public class Server extends AbstractServer {
                     }else priorityPool.add(newSocket);
                     //logger.log("Priority Pool SIZE: "+priorityPool.size());
                 }catch(IOException e){ /*logger.log(errorHandler.handleSocketIOException(SocketError.UNKNOWN_HOST));*/ }  
-                 catch(JAXBException e){ }
+                 catch(JAXBException e){out.println("JAXB!"); e.printStackTrace(); }
             }
             out.println("Server Channels Closed");
             socketConsumer.join();
@@ -128,6 +134,43 @@ public class Server extends AbstractServer {
          catch (InterruptedException e) { /*logger.log("Unable to join on threads... Alert Admin about this."); */}
         out.println("Server Terminated...");
     }
+    
+    
+    protected static final class UpdatePulse{
+        private static UpdatePulse pulsor;
+        Timer timer;
+        TimerTask task = new TimerTask(){
+            public void run(){
+               for(ServerInfo server:servers){
+                   try {
+                    SSLSocket otherServer = (SSLSocket)SSLSocketFactory.getDefault().createSocket(server.getHostname(), server.getPort());
+                    otherServer = SSLEncryptor.encrypt(otherServer, SSLEncryptor.AES, false);
+                    PrintWriter outbound = new PrintWriter(otherServer.getOutputStream());
+                    ServerPulseMessage msg = ServerPulseMessage.buildPulse(getHostname(), port, priorityPool.size());
+                    outbound.println(msg.marshal());
+                    outbound.flush();
+                }catch (UnknownHostException e) {
+                    out.format("Cant find %s:%d", server.getHostname(), server.getPort());
+                } catch (IOException e) {
+                    out.println("I have no idea what happened here");
+                    e.printStackTrace();
+                } catch (JAXBException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+               }
+            }
+        };
+        private UpdatePulse(){
+            timer = new Timer();
+            timer.schedule(task, 10000, 5000);
+        }
+        public static final UpdatePulse getPulsor(){
+            return (pulsor != null)?pulsor:(pulsor = new UpdatePulse());
+        }
+        
+    }
+    
     
     /**
      * Handles the listening for clients to the system, parses the input
@@ -183,7 +226,7 @@ public class Server extends AbstractServer {
                          * that the worker thread may need. Because of this, I decided to just throw an AssertionError on
                          * the variable first.mode if OTHER or null are found as first.mode's value. 
                          */
-                        if(first.getMode() != Message.Type.ATOMIC){
+                        if(first.getMode() != Message.Type.ATOMIC && first.getMode() != Message.Type.PULSE){
                             synchronized(readerIn){
                                 synchronized(writerIn){
                                     if(readerIn || (!readerIn && !writerIn)){
@@ -326,9 +369,9 @@ public class Server extends AbstractServer {
                 message = socket.getCurrentMsg();
                 while(weCantStop()){
                     out.println("Not ended...");
+                    out.println(message);
                     try{
                         message = (message == null)?readInstream():message;
-                        out.println(message.toString());
                         switch(message.getMsgType()){
                             case ATOMIC:
                             case DELETE:
@@ -363,8 +406,11 @@ public class Server extends AbstractServer {
                                 }
                                 if(response.getType() == Response.Type.ERROR) prepareToFinish();
                                 break;
-                            case UPDATE:
+                            case PULSE:
+                                out.println("GOT PULSE!");
+                                out.println(message);
                                 response = null;
+                                prepareToFinish();
                                 break;
                             case REPLICATE:
                                 response = serverProtocol.generateResponse(message);
@@ -382,7 +428,6 @@ public class Server extends AbstractServer {
                                 prepareToFinish();
                         }
                         message = null;
-                        out.println(response);
                         if(response!= null){
                             writeOutstream(response.marshal());
                         }
@@ -411,6 +456,7 @@ public class Server extends AbstractServer {
                     releaseWriteLock();
                     break;
                 case ATOMIC:
+                case PULSE:
                     work();
                     break;
                 default: throw new AssertionError(socket.getMode()); // WE SHOULDNT GET HERE... FAIL FAST...

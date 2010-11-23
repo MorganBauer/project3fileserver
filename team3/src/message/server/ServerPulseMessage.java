@@ -10,22 +10,18 @@ import team3.src.message.Message;
 @Message(Message.Type.PULSE)
 public final class ServerPulseMessage extends AbstractServerMessage {
 
-    @XmlAttribute(required=true)
+    @XmlElement(required=true)
     private int load;
-    @XmlElement()
-    private String[] directory;
     
     /**
      * Gets the current capacity of the file server (waiting clients)
      * @return how many clients this server is currently serving
      */
     public int getLoad(){ return load; }
-    /**
-     * Gets the current directory of this server
-     * @return current directory
-     */
-    public String[] getDirectory(){
-        return directory;
+
+    
+    public String toString(){
+         return String.format("Pulse Message from %s. Current Load is %d", getID(),load);
     }
     
     private ServerPulseMessage(){ }
@@ -35,13 +31,8 @@ public final class ServerPulseMessage extends AbstractServerMessage {
         this.load = load;
     }
     
-    private ServerPulseMessage(String host, int port, int load, String[] currentDirectory){
-        this(host, port, load);
-        this.directory = currentDirectory;
-    }
-    
     public String read() {
-        return (directory == null)?"Pulse":"Update";
+        return "Pulse";
     }
     /**
      * Create a simple pulse message for the master servers to use
@@ -52,16 +43,5 @@ public final class ServerPulseMessage extends AbstractServerMessage {
      */
     public static final ServerPulseMessage buildPulse(String host, int port, int load){
         return new ServerPulseMessage(host, port, load);
-    }
-    /**
-     * Create a pulse message with the updated directory
-     * @param host who is sending this
-     * @param port the port of the sender
-     * @param load how many clients are currently enqueue
-     * @param currentDirectory what the current file directory looks like
-     * @return pulse message
-     */
-    public static final ServerPulseMessage buildPulseWithUpdate(String host, int port, int load, String[] currentDirectory){
-        return new ServerPulseMessage(host, port, load, currentDirectory);
     }
 }

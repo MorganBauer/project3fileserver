@@ -13,6 +13,8 @@ public class ServerVotingMessage extends AbstractServerMessage implements Compar
     @XmlElement(required=true)
     public XMLGregorianCalendar timestamp;
     
+    private ServerVotingMessage(){ }
+    
     private ServerVotingMessage(String host, int port, XMLGregorianCalendar timestamp) {
         super(host, port);
         this.timestamp = timestamp;
