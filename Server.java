@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -184,7 +185,9 @@ public class Server extends AbstractServer {
     protected static class PriorityServerThread extends Thread{
         private volatile Integer readSemaphore = 0;
         private volatile Boolean writerIn = false;
+        private final Object writerInLock = new Object();
         private volatile Boolean readerIn = false;
+        private final Object readerInLock = new Object();
         private volatile Boolean isAlive = true;
         private boolean alreadySentMsg = false;
         
@@ -194,7 +197,7 @@ public class Server extends AbstractServer {
          * Gets the priority handling thread for this server
          * @return priority server thread
          */
-        public static final PriorityServerThread getThread(){
+        public static final synchronized PriorityServerThread getThread(){
             return (singleton !=null)?singleton:(singleton = new PriorityServerThread());
         }
         
@@ -230,8 +233,8 @@ public class Server extends AbstractServer {
                          * the variable first.mode if OTHER or null are found as first.mode's value. 
                          */
                         if(first.getMode() != Message.Type.ATOMIC && first.getMode() != Message.Type.PULSE){
-                            synchronized(readerIn){
-                                synchronized(writerIn){
+                            synchronized(readerInLock){
+                                synchronized(writerInLock){
                                     if(readerIn || (!readerIn && !writerIn)){
                                         //TODO: Deal with locks and priorities...
                                         switch(first.getMode()){
@@ -285,8 +288,8 @@ public class Server extends AbstractServer {
                 out.println("Waiting for other threads to finish execution...");
                 alreadySentMsg = true;
             }
-            synchronized(readerIn){
-                synchronized(writerIn){
+            synchronized(readerInLock){
+                synchronized(writerInLock){
                     return (!readerIn && !writerIn);
                 }
             }
@@ -297,8 +300,8 @@ public class Server extends AbstractServer {
          * @return true if able to obtain read lock, false otherwise
          */
         public boolean getReadLock(){
-            synchronized(readerIn){
-                synchronized(writerIn){
+            synchronized(readerInLock){
+                synchronized(writerInLock){
                     if(writerIn)return false;
                     else{
                         readerIn = true;
@@ -316,8 +319,8 @@ public class Server extends AbstractServer {
          * @return true if able to obtain write lock, false otherwise
          */
         public boolean getWriteLock(){
-            synchronized(writerIn){
-                synchronized(readerIn){
+            synchronized(readerInLock){
+                synchronized(writerInLock){
                     //logger.log("WRITE LOCK OBTAINED? "+ !(readerIn || readSemaphore > 0 || writerIn));
                     return (writerIn = !(readerIn || readSemaphore > 0 || writerIn));
                 }
@@ -329,7 +332,7 @@ public class Server extends AbstractServer {
          * reader cleanup (releasing read lock for writer to come in).
          */
         public void releaseReadLock(){
-            synchronized(readerIn){
+            synchronized(readerInLock){
                 //logger.log("READ LOCK --"+"READERS: "+(readSemaphore-1));
                 if(--readSemaphore == 0) readerIn = false;
             }
@@ -339,7 +342,7 @@ public class Server extends AbstractServer {
          * clients to have access to data
          */
         public void releaseWriteLock(){
-            synchronized(writerIn){
+            synchronized(writerInLock){
                 writerIn = false;
                 //logger.log("WRITE LOCK RELEASED");
             }

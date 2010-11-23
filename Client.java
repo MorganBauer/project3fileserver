@@ -1,16 +1,19 @@
 import static java.lang.System.out;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import javax.xml.bind.JAXBException;
 
+import sun.jkernel.DownloadManager;
 import team3.src.client.AbstractClient;
 import team3.src.exception.IllegalCommandException;
 import team3.src.message.AbstractMessage;
 import team3.src.message.response.AbstractResponse;
 import team3.src.protocol.ClientProtocol;
 import team3.src.util.ConfigData;
+import team3.src.util.SSLEncryptor;
 
 
 /**
@@ -38,6 +41,11 @@ public class Client extends AbstractClient {
                 }
                 else if(commandArgs[0].equals("bye")){
                     thenClientIsDone();   
+                }
+                else if (commandArgs[0].equals("encryptify"))
+                {
+                	out.println("changing encryption to " + commandArgs[1]);
+                	changeEncryptionAlgorithm(commandArgs[1]);
                 }
                 else{
                     if(commandArgs[0].equals("terminate")) thenClientIsDone();
@@ -77,10 +85,11 @@ public class Client extends AbstractClient {
         }
         public void run(){
             //TODO: logger.log("Client Thread "+getName()+" has started!");
-            String init = "";
+        	StringBuilder init = new StringBuilder();
+            //String init = "";
             AbstractMessage toServer;
             AbstractResponse fromServer;
-            for(String arg : commandArgs) init+=arg+" ";
+            for(String arg : commandArgs) init.append(arg+" ");
             try{
                 toServer = protocol.handleInput(commandArgs, getName());
                 initConnection();
@@ -120,8 +129,18 @@ public class Client extends AbstractClient {
                             writeToServer(toServer);
                             out.println("sent msg!");
                         }
-                    }catch(IOException e){ 
+                    }catch (SocketException se)
+                	{ // connection to server died
+                    	se.printStackTrace();
+                    	System.out.println("we cant stop is " + weCantStop());
+                		// set server status to dead
+                    	blacklistCurrentServer();
+                    	//reinit connection
+                		initConnection();
+                		writeToServer(toServer);
+                	}catch(IOException e){ 
                         //TODO: LOGGER!
+                    	e.printStackTrace();
                         prepareToFinish();
                     }catch(JAXBException e){
                         //TODO: Logger!
@@ -129,8 +148,10 @@ public class Client extends AbstractClient {
                         out.println("HEY!!!");
                         prepareToFinish();
                     }
-                }
-            }catch(IOException e){ out.println("Unable to connect..."); }
+                } // end keep doing stuff loop (multi-part messages?)
+            }catch(IOException e){ 
+            	e.printStackTrace();
+            	out.println("Unable to connect..."); }
             catch(IllegalCommandException e){ 
                 //TODO: Logger
                 out.println("Bad Command");
