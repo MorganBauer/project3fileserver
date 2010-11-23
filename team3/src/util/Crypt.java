@@ -105,7 +105,6 @@ public class Crypt
    public static void main(String args[])
    {
       byte[] sec = new byte[]{0x01, 0x72, 0x43, 0x3E, 0x1C, 0x7A, 0x55}; 
-      byte[] sec2 = new byte[]{0x01, 0x72, 0x43, 0x3E, 0x1C, 0x75, 0x55}; 
       String test = "It has to be hello world";
       System.out.println( test +" is encrypted to");
       String encrypted = encrypt(test,sec);

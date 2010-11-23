@@ -23,7 +23,7 @@ public final class IntraServerResponseFactory {
      * Creates a factory instance for the system to use.
      * @return factory instance
      */
-    public static final IntraServerResponseFactory getFactory(){
+    public static final synchronized IntraServerResponseFactory getFactory(){
         return (singleton != null)?singleton:(singleton = new IntraServerResponseFactory());
     }
     

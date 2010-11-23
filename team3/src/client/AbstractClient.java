@@ -4,6 +4,7 @@ import static java.lang.System.in;
 import static java.lang.System.out;
 import static java.lang.System.getProperty;
 import static java.lang.System.setProperty;
+import sun.jkernel.DownloadManager;
 import team3.src.exception.IllegalCommandException;
 
 import java.io.BufferedReader;
@@ -12,10 +13,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 //import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,6 +44,8 @@ public class AbstractClient {
     /** True if terminate has not been called, false otherwise. */
     private static boolean isNotDone = true;
     
+    static ConcurrentSkipListSet<Integer> downServers = new ConcurrentSkipListSet<Integer>();
+    
     protected static String encrypt = SSLEncryptor.AES;
     
     /**
@@ -53,6 +58,33 @@ public class AbstractClient {
      * Sets our isNotDone variable to false, to signal the end of this process
      */
     protected static void thenClientIsDone(){ isNotDone = false; }
+    
+    protected static void changeEncryptionAlgorithm(String algo)
+    {
+
+    	if (algo.equals("DES"))
+    	{
+    		encrypt = SSLEncryptor.DES;
+        	out.println("changing encryption to " + SSLEncryptor.DES);
+        	out.println("'encrypt' is " + encrypt);
+    	}else if (algo.equals("3DES"))
+    	{
+    		encrypt = SSLEncryptor.SanDES;    		
+        	out.println("changing encryption to " + SSLEncryptor.SanDES);
+        	out.println("'encrypt' is " + encrypt);
+    	}else if (algo.equals("AES"))
+    	{
+    		encrypt = SSLEncryptor.AES;
+        	out.println("changing encryption to " + SSLEncryptor.AES);
+        	out.println("'encrypt' is " + encrypt);
+    	}else if (algo.equals("RC4"))
+    	{
+    		encrypt = SSLEncryptor.RC4;
+        	out.println("changing encryption to " + SSLEncryptor.RC4);
+        	out.println("'encrypt' is " + encrypt);
+    	}
+    	//serverSocket = SSLEncryptor.encrypt(serverSocket, encrypt, false);
+    }
     
     public static final void setSSLProperties(){
         setProperty("javax.net.ssl.trustStore", "mySrvKeystore");
@@ -110,11 +142,12 @@ public class AbstractClient {
         out.println("file put <File> <Priority>: Put a file on the server");
         out.println("file get <File> <Priority>: Get a file from the server");
         out.println("delete <File> <Priority>");
+        out.println("encryptify <algoString>");
     }
     
     protected static final String[] parseCommand(String[] args) throws IllegalCommandException{
         if(args.length == 0) return parseCommand();
-        if(args[0].matches("file (put|get)|directory list|hello|terminate|delete|my directory|bye")) return args;
+        if(args[0].matches("file (put|get)|directory list|hello|terminate|delete|my directory|bye|encryptify")) return args;
         else throw new IllegalCommandException();
     }
     
@@ -130,7 +163,7 @@ public class AbstractClient {
             printMenu();
             inString = new BufferedReader(new InputStreamReader(in)).readLine();    
             Scanner commandScanner = new Scanner(inString);
-            if((command=commandScanner.findInLine("file (put|get)|directory list|hello|terminate|my directory|delete|bye")) != null)
+            if((command=commandScanner.findInLine("file (put|get)|directory list|hello|terminate|my directory|delete|bye|encryptify")) != null)
                 cmdList.add(command);   
             else{ throw new IllegalCommandException(); }
             try{ while((command=commandScanner.useDelimiter(" ").next()) != null) cmdList.add(command); }
@@ -195,6 +228,8 @@ public class AbstractClient {
         protected String filename;
         /** Max chunk size this clientThread will send/receive. */
         protected int maxChunkSize;
+        /** the host number in config data that we are currently connected to*/
+        protected int hostNumber;
         
         /**
          * Abstract Constructor...
@@ -231,8 +266,18 @@ public class AbstractClient {
          * @throws IOException if unable to read from in-stream buffer
          */
         protected AbstractResponse grabFromServer() throws IOException, JAXBException{
-            String message = clientIn.readLine();
-            return AbstractResponse.unmarshal(message);
+            
+        	//try
+        		String message = clientIn.readLine();
+                return AbstractResponse.unmarshal(message);
+  
+        	//catch (SocketException se)
+        	//{
+        		// server died
+        		// set server status to dead, reinit connection
+        		//initConnection();
+        	//}
+        	
         }
         
         /**
@@ -261,7 +306,7 @@ public class AbstractClient {
          * @throws NumberFormatException This means our config.ini file is corrupted
          */
         private int getPort(int server) throws NumberFormatException{
-            String host = new String("server-port"+server);
+            String host = "server-port"+server;//new String("server-port"+server);
             return Integer.parseInt(data.get(host));
         }
         
@@ -279,8 +324,13 @@ public class AbstractClient {
          * @return hostname the name of the host
          */
         private String getHost(int server){
-            String host = new String("server-hostname"+server);
+            String host = "server-hostname"+server;//new String("server-hostname"+server);
             return data.get(host);
+        }
+        
+        protected void blacklistCurrentServer()
+        {
+        	downServers.add(hostNumber);
         }
         
         /**
@@ -292,8 +342,17 @@ public class AbstractClient {
             //config data map has 2 entries per server and 1 for chunk size and 1 for client ID
             //maximum gives the max number of servers in config file
             int maximum = ((data.getSize()/2)-1);
-            int host = (int)((Math.random()*maximum)+1);
-            serverSocket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(getHost(host), getPort(host)); 
+            //int host;
+            do{
+            	hostNumber = (int)((Math.random()*maximum)+1);
+            	if (data.getSize() == downServers.size())
+            	{
+            		out.println("There are no known servers left to connect to.");
+            		break;
+            	}
+            } while (downServers.contains(hostNumber));
+            out.println("initing connection");
+            serverSocket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(getHost(hostNumber), getPort(hostNumber)); 
             serverSocket = SSLEncryptor.encrypt(serverSocket, encrypt, false);
             clientIn = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
             clientOut = new PrintWriter(serverSocket.getOutputStream());
@@ -301,13 +360,16 @@ public class AbstractClient {
         
         /**
          * Closes current connections held by this clientThread
+         * @throws IOException 
+         * @throws UnknownHostException 
          */
         protected void closeConnection(){
             try{
                 clientIn.close();
                 clientOut.close();
                 serverSocket.close();
-            }catch(IOException e){/* We will ignore */ }
+            }catch(IOException e){
+            	e.printStackTrace();/* We will ignore */ }
             
         }
     }

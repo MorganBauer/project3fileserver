@@ -54,7 +54,7 @@ public class IntraServerProtocol extends AbstractProtocol {
     private AbstractResponse handleDataTransfer(ServerReplicationMessage msg){
         if(exists(msg.read())) 
             try { 
-                String data = dataToMsgUtil.data2Base64(msg.read(), (msg.read()!= filename)?(chunkNo=0):(++chunkNo), chunkSize, false);
+                String data = dataToMsgUtil.data2Base64(msg.read(), (msg.read().equals(filename))?(chunkNo=0):(++chunkNo), chunkSize, false);
                 return responseFactory.createReplicationResponse(msg.read(), data, (((4/3)*data.length())/KILOBYTE < chunkSize)); } 
             catch (IOException e) { return responseFactory.createErrorMessage(this.id, msg, IO_ERROR, "Unable to generate data stripe"); }
         else return responseFactory.createErrorMessage(this.id, msg, FILE_NOT_FOUND, "Unable to find file");
