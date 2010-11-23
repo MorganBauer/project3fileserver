@@ -20,7 +20,7 @@ public final class ServerMessageFactory{
      * Grab the factory for building server messages
      * @return server message factory
      */
-    public static final ServerMessageFactory getFactory(){
+    public static final synchronized ServerMessageFactory getFactory(){
         return (singleton != null)?singleton:(singleton = new ServerMessageFactory());
     }
     

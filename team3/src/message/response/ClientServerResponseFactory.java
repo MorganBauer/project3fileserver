@@ -22,7 +22,7 @@ public class ClientServerResponseFactory {
 	 * Grabs the factory for making response messages
 	 * @return a factory
 	 */
-	public static final ClientServerResponseFactory getFactory(){
+	public static final synchronized ClientServerResponseFactory getFactory(){
 		return (singleton!=null)?singleton:(singleton = new ClientServerResponseFactory());
 	}
 	/**

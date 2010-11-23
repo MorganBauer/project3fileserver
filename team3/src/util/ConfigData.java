@@ -28,7 +28,7 @@ public class ConfigData{
 	 * @return Copy of ConfigData singleton.
 	 * @throws IOException
 	 */
-	public static ConfigData getConfigData() throws IOException{
+	public static synchronized ConfigData getConfigData() throws IOException{
 		return (singleton == null)? generateConfigData(): singleton;
 	}
 	
