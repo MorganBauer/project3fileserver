@@ -306,7 +306,7 @@ public class AbstractClient {
          * @throws NumberFormatException This means our config.ini file is corrupted
          */
         private int getPort(int server) throws NumberFormatException{
-            String host = new String("server-port"+server);
+            String host = "server-port"+server;//new String("server-port"+server);
             return Integer.parseInt(data.get(host));
         }
         
@@ -324,7 +324,7 @@ public class AbstractClient {
          * @return hostname the name of the host
          */
         private String getHost(int server){
-            String host = new String("server-hostname"+server);
+            String host = "server-hostname"+server;//new String("server-hostname"+server);
             return data.get(host);
         }
         
