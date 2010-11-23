@@ -11,6 +11,7 @@ import team3.src.message.AbstractMessage;
 import team3.src.message.response.AbstractResponse;
 import team3.src.protocol.ClientProtocol;
 import team3.src.util.ConfigData;
+import team3.src.util.SSLEncryptor;
 
 
 /**
@@ -38,6 +39,11 @@ public class Client extends AbstractClient {
                 }
                 else if(commandArgs[0].equals("bye")){
                     thenClientIsDone();   
+                }
+                else if (commandArgs[0].equals("encryptify"))
+                {
+                	out.println("changing encryption to " + commandArgs[1]);
+                	changeEncryptionAlgorithm(commandArgs[1]);
                 }
                 else{
                     if(commandArgs[0].equals("terminate")) thenClientIsDone();

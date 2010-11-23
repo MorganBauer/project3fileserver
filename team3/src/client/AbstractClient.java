@@ -54,6 +54,33 @@ public class AbstractClient {
      */
     protected static void thenClientIsDone(){ isNotDone = false; }
     
+    protected static void changeEncryptionAlgorithm(String algo)
+    {
+
+    	if (algo.equals("DES"))
+    	{
+    		encrypt = SSLEncryptor.DES;
+        	out.println("changing encryption to " + SSLEncryptor.DES);
+        	out.println("'encrypt' is " + encrypt);
+    	}else if (algo.equals("3DES"))
+    	{
+    		encrypt = SSLEncryptor.SanDES;    		
+        	out.println("changing encryption to " + SSLEncryptor.SanDES);
+        	out.println("'encrypt' is " + encrypt);
+    	}else if (algo.equals("AES"))
+    	{
+    		encrypt = SSLEncryptor.AES;
+        	out.println("changing encryption to " + SSLEncryptor.AES);
+        	out.println("'encrypt' is " + encrypt);
+    	}else if (algo.equals("RC4"))
+    	{
+    		encrypt = SSLEncryptor.RC4;
+        	out.println("changing encryption to " + SSLEncryptor.RC4);
+        	out.println("'encrypt' is " + encrypt);
+    	}
+    	//serverSocket = SSLEncryptor.encrypt(serverSocket, encrypt, false);
+    }
+    
     public static final void setSSLProperties(){
         setProperty("javax.net.ssl.trustStore", "mySrvKeystore");
         setProperty("javax.net.ssl.trustStorePassword", "123456");
@@ -110,11 +137,12 @@ public class AbstractClient {
         out.println("file put <File> <Priority>: Put a file on the server");
         out.println("file get <File> <Priority>: Get a file from the server");
         out.println("delete <File> <Priority>");
+        out.println("encryptify <algoString>");
     }
     
     protected static final String[] parseCommand(String[] args) throws IllegalCommandException{
         if(args.length == 0) return parseCommand();
-        if(args[0].matches("file (put|get)|directory list|hello|terminate|delete|my directory|bye")) return args;
+        if(args[0].matches("file (put|get)|directory list|hello|terminate|delete|my directory|bye|encryptify")) return args;
         else throw new IllegalCommandException();
     }
     
@@ -130,7 +158,7 @@ public class AbstractClient {
             printMenu();
             inString = new BufferedReader(new InputStreamReader(in)).readLine();    
             Scanner commandScanner = new Scanner(inString);
-            if((command=commandScanner.findInLine("file (put|get)|directory list|hello|terminate|my directory|delete|bye")) != null)
+            if((command=commandScanner.findInLine("file (put|get)|directory list|hello|terminate|my directory|delete|bye|encryptify")) != null)
                 cmdList.add(command);   
             else{ throw new IllegalCommandException(); }
             try{ while((command=commandScanner.useDelimiter(" ").next()) != null) cmdList.add(command); }
@@ -294,7 +322,7 @@ public class AbstractClient {
             int maximum = ((data.getSize()/2)-1);
             int host = (int)((Math.random()*maximum)+1);
             serverSocket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(getHost(host), getPort(host)); 
-            serverSocket = SSLEncryptor.encrypt(serverSocket, encrypt, false);
+            serverSocket = SSLEncryptor.encrypt(serverSocket, encrypt, true);
             clientIn = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
             clientOut = new PrintWriter(serverSocket.getOutputStream());
         }

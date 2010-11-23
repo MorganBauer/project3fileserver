@@ -14,10 +14,10 @@ import javax.net.ssl.SSLSocket;
  */
 public final class SSLEncryptor {
     
-    public static final String AES = ".*AES.*";
-    public static final String RC4 = ".*RC4.*";
-    public static final String DES = ".*DES.*";
-    public static final String SanDES = ".*3DES.*";
+    public static final String AES = ".*_AES_.*";
+    public static final String RC4 = ".*_RC4_.*";
+    public static final String DES = ".*_DES_.*";
+    public static final String SanDES = ".*_3DES_.*";
     
     /**
      * Deals with encryption methds for sockets
