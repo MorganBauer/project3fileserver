@@ -110,6 +110,7 @@ public abstract class AbstractServer {
                 str.append(Character.toString((char)c));
             }
             hostname = str.toString();
+            in.close();
        }catch(IOException e){ throw new AssertionError("U NOT WORKING IN UNIX??"); }
        port = 41152;
        if(args.length == 1)

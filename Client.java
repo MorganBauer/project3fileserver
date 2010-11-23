@@ -85,10 +85,11 @@ public class Client extends AbstractClient {
         }
         public void run(){
             //TODO: logger.log("Client Thread "+getName()+" has started!");
-            String init = "";
+        	StringBuilder init = new StringBuilder();
+            //String init = "";
             AbstractMessage toServer;
             AbstractResponse fromServer;
-            for(String arg : commandArgs) init+=arg+" ";
+            for(String arg : commandArgs) init.append(arg+" ");
             try{
                 toServer = protocol.handleInput(commandArgs, getName());
                 initConnection();

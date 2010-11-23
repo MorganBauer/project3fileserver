@@ -15,13 +15,13 @@ import java.io.RandomAccessFile;
  */
 public final class Data2MsgUtil {
 	/** Set this flag if we want verbose output */
-	private  boolean verbose;
+	private boolean verbose;
 	/** Constant kilobyte*/
-	private  final int KILOBYTE = 1024;
+	private static final int KILOBYTE = 1024;
 	/** Name of file currently being serviced */
-	private  String filename="";
+	private String filename="";
 	/** Name of current base64 tempFile */
-	private  String base64DataFile = "";
+	private String base64DataFile = "";
 	
 	/**
 	 * Responsible for grabbing chunkSize worth of converted base64 data from tempFile
