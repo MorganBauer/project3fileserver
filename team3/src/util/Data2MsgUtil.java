@@ -57,6 +57,7 @@ public final class Data2MsgUtil {
 		String data = Base64.encode(buffer);
 		newFileStream.write(data);
 		newFileStream.flush();
+		newFileStream.close();
 		if(verbose) out.println("TempFile Length: "+newFile.length());
 	}
 	

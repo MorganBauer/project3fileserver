@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -184,7 +185,9 @@ public class Server extends AbstractServer {
     protected static class PriorityServerThread extends Thread{
         private volatile Integer readSemaphore = 0;
         private volatile Boolean writerIn = false;
+        private final Object writerLock = new Object();
         private volatile Boolean readerIn = false;
+        private final Object readerLock = new Object();
         private volatile Boolean isAlive = true;
         private boolean alreadySentMsg = false;
         
