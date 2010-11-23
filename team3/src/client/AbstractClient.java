@@ -4,6 +4,7 @@ import static java.lang.System.in;
 import static java.lang.System.out;
 import static java.lang.System.getProperty;
 import static java.lang.System.setProperty;
+import sun.jkernel.DownloadManager;
 import team3.src.exception.IllegalCommandException;
 
 import java.io.BufferedReader;
@@ -12,10 +13,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 //import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,6 +43,8 @@ public class AbstractClient {
     private static boolean isNotFirstRequest = false;
     /** True if terminate has not been called, false otherwise. */
     private static boolean isNotDone = true;
+    
+    static ConcurrentSkipListSet<Integer> downServers = new ConcurrentSkipListSet<Integer>();
     
     protected static String encrypt = SSLEncryptor.AES;
     
@@ -223,6 +228,8 @@ public class AbstractClient {
         protected String filename;
         /** Max chunk size this clientThread will send/receive. */
         protected int maxChunkSize;
+        /** the host number in config data that we are currently connected to*/
+        protected int hostNumber;
         
         /**
          * Abstract Constructor...
@@ -259,8 +266,18 @@ public class AbstractClient {
          * @throws IOException if unable to read from in-stream buffer
          */
         protected AbstractResponse grabFromServer() throws IOException, JAXBException{
-            String message = clientIn.readLine();
-            return AbstractResponse.unmarshal(message);
+            
+        	//try
+        		String message = clientIn.readLine();
+                return AbstractResponse.unmarshal(message);
+  
+        	//catch (SocketException se)
+        	//{
+        		// server died
+        		// set server status to dead, reinit connection
+        		//initConnection();
+        	//}
+        	
         }
         
         /**
@@ -311,6 +328,11 @@ public class AbstractClient {
             return data.get(host);
         }
         
+        protected void blacklistCurrentServer()
+        {
+        	downServers.add(hostNumber);
+        }
+        
         /**
          * Initializes connection to server socket for communication
          * @throws UnknownHostException If we are unable to find server
@@ -320,22 +342,29 @@ public class AbstractClient {
             //config data map has 2 entries per server and 1 for chunk size and 1 for client ID
             //maximum gives the max number of servers in config file
             int maximum = ((data.getSize()/2)-1);
-            int host = (int)((Math.random()*maximum)+1);
-            serverSocket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(getHost(host), getPort(host)); 
-            serverSocket = SSLEncryptor.encrypt(serverSocket, encrypt, true);
+            //int host;
+            do{
+            	hostNumber = (int)((Math.random()*maximum)+1);
+            } while (downServers.contains(hostNumber));
+            out.println("initing connection");
+            serverSocket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(getHost(hostNumber), getPort(hostNumber)); 
+            serverSocket = SSLEncryptor.encrypt(serverSocket, encrypt, false);
             clientIn = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
             clientOut = new PrintWriter(serverSocket.getOutputStream());
         }
         
         /**
          * Closes current connections held by this clientThread
+         * @throws IOException 
+         * @throws UnknownHostException 
          */
         protected void closeConnection(){
             try{
                 clientIn.close();
                 clientOut.close();
                 serverSocket.close();
-            }catch(IOException e){/* We will ignore */ }
+            }catch(IOException e){
+            	e.printStackTrace();/* We will ignore */ }
             
         }
     }

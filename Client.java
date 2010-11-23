@@ -1,10 +1,12 @@
 import static java.lang.System.out;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import javax.xml.bind.JAXBException;
 
+import sun.jkernel.DownloadManager;
 import team3.src.client.AbstractClient;
 import team3.src.exception.IllegalCommandException;
 import team3.src.message.AbstractMessage;
@@ -126,8 +128,18 @@ public class Client extends AbstractClient {
                             writeToServer(toServer);
                             out.println("sent msg!");
                         }
-                    }catch(IOException e){ 
+                    }catch (SocketException se)
+                	{ // connection to server died
+                    	se.printStackTrace();
+                    	System.out.println("we cant stop is " + weCantStop());
+                		// set server status to dead
+                    	blacklistCurrentServer();
+                    	//reinit connection
+                		initConnection();
+                		writeToServer(toServer);
+                	}catch(IOException e){ 
                         //TODO: LOGGER!
+                    	e.printStackTrace();
                         prepareToFinish();
                     }catch(JAXBException e){
                         //TODO: Logger!
@@ -135,8 +147,10 @@ public class Client extends AbstractClient {
                         out.println("HEY!!!");
                         prepareToFinish();
                     }
-                }
-            }catch(IOException e){ out.println("Unable to connect..."); }
+                } // end keep doing stuff loop (multi-part messages?)
+            }catch(IOException e){ 
+            	e.printStackTrace();
+            	out.println("Unable to connect..."); }
             catch(IllegalCommandException e){ 
                 //TODO: Logger
                 out.println("Bad Command");
