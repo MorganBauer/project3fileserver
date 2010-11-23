@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -31,6 +32,9 @@ public class ConfigData{
 		return (singleton == null)? generateConfigData(): singleton;
 	}
 	
+	public int getSize(){
+	    return this.configData.size();
+	}
 	
 	/**
 	 * Creates a special ConfigData object based on an external config.ini file
@@ -188,7 +192,10 @@ public class ConfigData{
 			BufferedReader configFile = new BufferedReader(file);
 			while((line =configFile.readLine()) != null){
 				scanner = new Scanner(line).useDelimiter(": ");
-				map.put(scanner.next(), stripInvalids(scanner.next()));
+				String key = scanner.next();
+				String val = stripInvalids(scanner.next()).toLowerCase();
+				if(val.equals("localhost")) val = InetAddress.getLocalHost().getHostName();
+				map.put(key, val);
 			}
 			return map;
 		}

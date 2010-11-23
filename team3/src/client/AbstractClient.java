@@ -104,7 +104,7 @@ public class AbstractClient {
      */
     private static final void printMenu(){
         out.println("Command List");
-        out.println("hello, terminate");
+        out.println("hello, terminate, bye");
         out.println("directory list <Start> <Max> <Priority>");
         out.println("my directory <Start> <Max>");
         out.println("file put <File> <Priority>: Put a file on the server");
@@ -114,7 +114,7 @@ public class AbstractClient {
     
     protected static final String[] parseCommand(String[] args) throws IllegalCommandException{
         if(args.length == 0) return parseCommand();
-        if(args[0].matches("file (put|get)|directory list|hello|terminate|delete|my directory")) return args;
+        if(args[0].matches("file (put|get)|directory list|hello|terminate|delete|my directory|bye")) return args;
         else throw new IllegalCommandException();
     }
     
@@ -130,7 +130,7 @@ public class AbstractClient {
             printMenu();
             inString = new BufferedReader(new InputStreamReader(in)).readLine();    
             Scanner commandScanner = new Scanner(inString);
-            if((command=commandScanner.findInLine("file (put|get)|directory list|hello|terminate|my directory|delete")) != null)
+            if((command=commandScanner.findInLine("file (put|get)|directory list|hello|terminate|my directory|delete|bye")) != null)
                 cmdList.add(command);   
             else{ throw new IllegalCommandException(); }
             try{ while((command=commandScanner.useDelimiter(" ").next()) != null) cmdList.add(command); }
@@ -260,8 +260,9 @@ public class AbstractClient {
          * @return port number
          * @throws NumberFormatException This means our config.ini file is corrupted
          */
-        private int getPort() throws NumberFormatException{
-            return Integer.parseInt(data.get("server-port1"));
+        private int getPort(int server) throws NumberFormatException{
+            String host = new String("server-port"+server);
+            return Integer.parseInt(data.get(host));
         }
         
         /**
@@ -277,8 +278,9 @@ public class AbstractClient {
          * Retrieves hostname from ConfigData object
          * @return hostname the name of the host
          */
-        private String getHost(){
-            return data.get("server-hostname1");
+        private String getHost(int server){
+            String host = new String("server-hostname"+server);
+            return data.get(host);
         }
         
         /**
@@ -287,7 +289,11 @@ public class AbstractClient {
          * @throws IOException if we cannot gain access to serverSocket I/O streams
          */
         protected void initConnection() throws UnknownHostException, IOException{
-            serverSocket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(getHost(), getPort()); 
+            //config data map has 2 entries per server and 1 for chunk size and 1 for client ID
+            //maximum gives the max number of servers in config file
+            int maximum = ((data.getSize()/2)-1);
+            int host = (int)((Math.random()*maximum)+1);
+            serverSocket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(getHost(host), getPort(host)); 
             serverSocket = SSLEncryptor.encrypt(serverSocket, encrypt, false);
             clientIn = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
             clientOut = new PrintWriter(serverSocket.getOutputStream());
