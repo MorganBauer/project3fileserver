@@ -2,9 +2,11 @@ package team3.src.message;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import team3.src.message.response.AbstractResponse;
-
+@XmlRootElement(name="LogMessage")
+@Message(Message.Type.ATOMIC)
 public class LogMessage extends AbstractMessage{
 	
 	@XmlAttribute(required=true)
@@ -38,13 +40,21 @@ public class LogMessage extends AbstractMessage{
 		this.load = load;
 		this.id = "none";
 	}
-	public static LogMessage buildLogEventMessage(String host,int port,String event,String load,String id){
+	public static LogMessage buildLogEventMessage(String host, int port, String event, String load, String id){
 		return new LogMessage(host, port, event, load, id );
 	}
-	public static LogMessage buildLogStatusMessage(String host,int port,String event,String load,String id){
+	public static LogMessage buildLogStatusMessage(String host, int port, String event, String load){
 		return new LogMessage(host, port, event, load);
 	}
-
+    public String getHostName(){
+    	return hostName;
+    }
+    public int getPort(){
+    	return port;
+    }
+    public String getLoad(){
+    	return load;
+    }
 	@Override
 	public String getID() {
 		// TODO Auto-generated method stub
