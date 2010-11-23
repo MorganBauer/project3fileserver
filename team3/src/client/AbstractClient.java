@@ -345,6 +345,11 @@ public class AbstractClient {
             //int host;
             do{
             	hostNumber = (int)((Math.random()*maximum)+1);
+            	if (data.getSize() == downServers.size())
+            	{
+            		out.println("There are no known servers left to connect to.");
+            		break;
+            	}
             } while (downServers.contains(hostNumber));
             out.println("initing connection");
             serverSocket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(getHost(hostNumber), getPort(hostNumber)); 
