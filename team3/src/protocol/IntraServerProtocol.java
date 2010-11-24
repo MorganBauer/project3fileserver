@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 
 import team3.src.message.AbstractMessage;
-import team3.src.message.DeleteMessage;
 import team3.src.message.ServerMessageFactory;
 
 import team3.src.message.response.AbstractResponse;
@@ -38,8 +37,6 @@ public class IntraServerProtocol extends AbstractProtocol {
                 return handleDataTransfer((ServerReplicationMessage) msg);
             case PULSE:
                 throw new AssertionError("PULSE MESSAGES DONT NEED RESPONSES!!!");
-            case DELETE:
-                return handleDelete((DeleteMessage) msg);
             default: return null; //Ignore stuff we aren't interested in...   
         }
     }
@@ -65,18 +62,6 @@ public class IntraServerProtocol extends AbstractProtocol {
         else return responseFactory.createErrorMessage(this.id, msg, FILE_NOT_FOUND, "Unable to find file");
     }
     
-    /**
-     * Handles Delete Messages
-     * @param msg what was sent
-     * @return Abstract Response
-     */
-    private AbstractResponse handleDelete(DeleteMessage msg){
-        if(exists(msg.read())) 
-            return (delete(msg.read()))?
-                    responseFactory.createDeleteResponse(msg.read()):
-                    responseFactory.createErrorMessage(id, msg, DEL_ERROR, "Unable to delete file");
-        return responseFactory.createErrorMessage(id, msg, FILE_NOT_FOUND, "File couldn't be found");    
-    }
     
     private IntraServerProtocol(String id, int port,  int chunkSize) {
         super(id+":"+port);

@@ -1,6 +1,5 @@
 package team3.src.message;
 
-import static team3.src.message.DeleteMessage.buildDeleteMessage;
 import static team3.src.message.response.ErrorResponse.buildErrorMessage;
 import static team3.src.message.server.ServerPulseMessage.*;
 import static team3.src.message.server.ServerReplicationMessage.buildReplicationMessage;
@@ -32,16 +31,6 @@ public final class ServerMessageFactory{
         return buildReplicationMessage(host, port, filename);
     }
     
-    /**
-     * Create a delete message
-     * @param clientID the client doing the deleting
-     * @param priority how important this operation is
-     * @param filename the file we want to delete
-     * @return a new delete message
-     */
-    public final DeleteMessage createDeleteMessage(String clientID, int priority, String filename){
-        return buildDeleteMessage(clientID, priority, filename);
-    }
     
     /**
      * @param host who is sending this
