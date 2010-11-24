@@ -187,6 +187,7 @@ public class Server extends AbstractServer {
         private volatile Boolean readerIn = false;
         private final Object readerInLock = new Object();
         private volatile Boolean isAlive = true;
+        private final Object isAliveLock = new Object();
         private boolean alreadySentMsg = false;
         
         private static PriorityServerThread singleton;
@@ -210,7 +211,7 @@ public class Server extends AbstractServer {
          * @return true if yes, false if no
          */
         public boolean canRun(){
-            synchronized(isAlive){
+            synchronized(isAliveLock){
                 return isAlive;
             }
         }
@@ -436,7 +437,7 @@ public class Server extends AbstractServer {
                         if(response!= null){
                             writeOutstream(response.marshal());
                         }
-                        synchronized(isAlive){
+                        synchronized(isAliveLock){
                             isAlive = (isAlive)?!protocol.isTerminated():isAlive;
                         }
                     }
