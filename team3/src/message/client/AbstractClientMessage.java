@@ -1,0 +1,42 @@
+package team3.src.message.client;
+
+import java.io.ByteArrayInputStream;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import team3.src.message.AbstractMessage;
+import team3.src.message.Message;
+
+/**
+ * 
+ * @author Joir-dan Gumbs
+ * Abstraction of our Message Object. Defines clientID.
+ */
+@XmlRootElement(name="AbstractClientMessage")
+@Message(Message.Type.UNKNOWN)
+public abstract class AbstractClientMessage extends AbstractMessage  {
+
+	
+	@XmlAttribute(required=true)
+	private String clientID;
+	@XmlAttribute(required=true)
+	private int priority;
+
+	
+	public String getID(){ return clientID; }
+	public int getPriority(){ return priority; }
+	
+
+	protected AbstractClientMessage(String clientID, int priority){
+		super();
+		this.clientID = clientID;
+		this.priority = (priority < 0)?0:priority;
+		
+	}
+	protected AbstractClientMessage(){ }
+	
+}

@@ -1,0 +1,6 @@
+SimpleResponse
+FileGetResponse
+FilePutResponse
+WaitResponse 
+DeleteResponse
+ErrorResponse
