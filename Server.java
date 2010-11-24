@@ -3,13 +3,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -60,14 +58,14 @@ public class Server extends AbstractServer {
      * @return message sent from client
      * @throws IOException
      */
-    private static String getMessage(Socket client) throws IOException{
-        BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
+    private static String getMessage(final Socket client) throws IOException{
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
         return reader.readLine();
     }
 
 
-    private static void sendWait(Socket client, AbstractResponse msg) throws IOException{
-        PrintWriter writer = new PrintWriter(client.getOutputStream());
+    private static void sendWait(final Socket client, final AbstractResponse msg) throws IOException{
+        final PrintWriter writer = new PrintWriter(client.getOutputStream());
         writer.println(msg);
         writer.flush();
     }
@@ -255,7 +253,8 @@ public class Server extends AbstractServer {
                                                 WorkerThread thread = new WorkerThread(first);
                                                 thread.start();
                                                 //README!! WORKER MUST RELEASE LOCK IN WORKER THREAD!!!
-                                            }else priorityPool.add(first);
+                                            }else 
+                                            	{priorityPool.add(first);}
                                             break;
                                         }
                                         default: throw new AssertionError(first.getMode());
@@ -322,7 +321,7 @@ public class Server extends AbstractServer {
             synchronized(readerInLock){
                 synchronized(writerInLock){
                     //logger.log("WRITE LOCK OBTAINED? "+ !(readerIn || readSemaphore > 0 || writerIn));
-                    return (writerIn = !(readerIn || readSemaphore > 0 || writerIn));
+                    return (writerIn ^= (readerIn || readSemaphore > 0 || writerIn));
                 }
             }
         }
@@ -358,7 +357,7 @@ public class Server extends AbstractServer {
             private AbstractMessage message;
             private ServerClientProtocol protocol;
             
-            private WorkerThread(PrioritySocket pSocket){
+            private WorkerThread(final PrioritySocket pSocket){
                 super(pSocket.getID());
                 this.socket = pSocket;
                 this.protocol = ServerClientProtocol.getProtocol(pSocket.getID());

@@ -44,7 +44,7 @@ public class AbstractClient {
     /** True if terminate has not been called, false otherwise. */
     private static boolean isNotDone = true;
     
-    static ConcurrentSkipListSet<Integer> downServers = new ConcurrentSkipListSet<Integer>();
+    private static ConcurrentSkipListSet<Integer> downServers = new ConcurrentSkipListSet<Integer>();
     
     protected static String encrypt = SSLEncryptor.AES;
     
@@ -59,29 +59,29 @@ public class AbstractClient {
      */
     protected static void thenClientIsDone(){ isNotDone = false; }
     
-    protected static void changeEncryptionAlgorithm(String algo)
+    protected static void changeEncryptionAlgorithm(final String algo)
     {
 
     	if (algo.equals("DES"))
     	{
     		encrypt = SSLEncryptor.DES;
         	out.println("changing encryption to " + SSLEncryptor.DES);
-        	out.println("'encrypt' is " + encrypt);
+        	//out.println("'encrypt' is " + encrypt);
     	}else if (algo.equals("3DES"))
     	{
     		encrypt = SSLEncryptor.SanDES;    		
         	out.println("changing encryption to " + SSLEncryptor.SanDES);
-        	out.println("'encrypt' is " + encrypt);
+        	//out.println("'encrypt' is " + encrypt);
     	}else if (algo.equals("AES"))
     	{
     		encrypt = SSLEncryptor.AES;
         	out.println("changing encryption to " + SSLEncryptor.AES);
-        	out.println("'encrypt' is " + encrypt);
+        	//out.println("'encrypt' is " + encrypt);
     	}else if (algo.equals("RC4"))
     	{
     		encrypt = SSLEncryptor.RC4;
         	out.println("changing encryption to " + SSLEncryptor.RC4);
-        	out.println("'encrypt' is " + encrypt);
+        	//out.println("'encrypt' is " + encrypt);
     	}
     	//serverSocket = SSLEncryptor.encrypt(serverSocket, encrypt, false);
     }
@@ -158,17 +158,17 @@ public class AbstractClient {
      */
     protected static final String[] parseCommand() throws IllegalCommandException{
         String command, inString;
-        ArrayList<String> cmdList = new ArrayList<String>();
+        final ArrayList<String> cmdList = new ArrayList<String>();
         try{
             printMenu();
             inString = new BufferedReader(new InputStreamReader(in)).readLine();    
-            Scanner commandScanner = new Scanner(inString);
+            final Scanner commandScanner = new Scanner(inString);
             if((command=commandScanner.findInLine("file (put|get)|directory list|hello|terminate|my directory|delete|bye|encryptify")) != null)
                 cmdList.add(command);   
             else{ throw new IllegalCommandException(); }
             try{ while((command=commandScanner.useDelimiter(" ").next()) != null) cmdList.add(command); }
             catch(NoSuchElementException e){ /* Dont worry about it... */ }
-            String[] strList = new String[cmdList.size()];
+            final String[] strList = new String[cmdList.size()];
             cmdList.toArray(strList);
             return strList;
         }catch(IOException e){ 
@@ -183,10 +183,10 @@ public class AbstractClient {
      */
     // TODO: WILL NEED TO DO SOME MODIFYING LATER
     protected static void getDirectory(String[] args) throws IllegalCommandException{
-        String format = "%1$-40s%2$-40s\n";
+        final String format = "%1$-40s%2$-40s\n";
         if(args.length != 3) throw new IllegalCommandException();
         try{
-            int start = Integer.parseInt(args[1]);
+            final int start = Integer.parseInt(args[1]);
             int nmax = Integer.parseInt(args[2]);
             File file = new File(getProperty("user.dir"));
             if(file.list().length < start || start < 0){
