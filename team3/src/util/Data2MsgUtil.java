@@ -21,7 +21,7 @@ public final class Data2MsgUtil {
 	/** Name of file currently being serviced */
 	private  String filename="";
 	/** Name of current base64 tempFile */
-	private  String base64DataFile = "";
+	private  String base64DataFile = null;
 	
 	/**
 	 * Responsible for grabbing chunkSize worth of converted base64 data from tempFile

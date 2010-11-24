@@ -120,7 +120,7 @@ public class ServerClientProtocol extends AbstractProtocol {
             try{
                 String data = dataToMsgUtil.data2Base64(msg.read(), msg.getChunkNo(), msg.getChunkSize(), false);
                 out.println(((4/3)*data.length())/KILOBYTE);
-                out.println(((data.length())/KILOBYTE < msg.getChunkSize()));
+                if(((data.length())/KILOBYTE < msg.getChunkSize())) dataToMsgUtil.cleanup();
                 return responseFactory.createFileGetDataResponse(data, (4/3)*(data.length())/KILOBYTE, (((data.length())/KILOBYTE) < msg.getChunkSize()));    
             }catch(IOException e){
                 return responseFactory.createErrorMessage(id, msg, FILE_NOT_FOUND, "File not in system");
