@@ -1,11 +1,11 @@
 package team3.src.message;
 
-import static team3.src.message.DeleteMessage.*;
+import static team3.src.message.client.DeleteMessage.*;
 import static team3.src.message.ErrorMessage.*;
 import static team3.src.message.client.SimpleMessage.*;
 import static team3.src.message.client.FileGetMessage.*;
 import static team3.src.message.client.FilePutMessage.*;
-import team3.src.message.DeleteMessage;
+import team3.src.message.client.DeleteMessage;
 import team3.src.message.client.FileGetMessage;
 import team3.src.message.client.FilePutMessage;
 import team3.src.message.client.SimpleMessage;

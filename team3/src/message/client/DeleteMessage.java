@@ -1,4 +1,4 @@
-package team3.src.message;
+package team3.src.message.client;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -28,8 +28,8 @@ public class DeleteMessage extends AbstractClientMessage {
     
     private DeleteMessage() { }
     
-    private DeleteMessage(String id, int priority, String filename){
-        super(id, priority);
+    private DeleteMessage(String clientID, int priority, String filename){
+        super(clientID, priority);
         this.filename = filename;
     }
     /**
@@ -40,23 +40,13 @@ public class DeleteMessage extends AbstractClientMessage {
      * @param filename the name of the file
      * @return a new delete message
      */
-    public static DeleteMessage buildDeleteMessage(String id, int priority, String filename){
-        return new DeleteMessage(id, priority, filename);
+    public static DeleteMessage buildDeleteMessage(String clientID, int priority, String filename){
+        return new DeleteMessage(clientID, priority, filename);
     }
     
     public String toString(){
         return String.format("%s requesting to delete %s, with importance of %d.",getID(), filename, getPriority());
     }
     
-    /**
-     * Factory Method creating delete messages for intraserver communication
-     * <br>THIS SHOULD ONLY BE USED FOR SERVER COMMUNICATION!!!
-     * @param id who this is coming from
-     * @param filename the name of the file to delete
-     * @return new Server Delete Message
-     */
-    public static final DeleteMessage buildServerDeleteMessage(String id, String filename){
-        return new DeleteMessage(id, 0, filename);
-    }
 
 }

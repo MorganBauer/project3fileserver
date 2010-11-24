@@ -9,7 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import team3.src.message.AbstractMessage;
-import team3.src.message.DeleteMessage;
+import team3.src.message.client.DeleteMessage;
 import team3.src.message.client.FileGetMessage;
 import team3.src.message.client.FilePutMessage;
 import team3.src.message.client.SimpleMessage;
