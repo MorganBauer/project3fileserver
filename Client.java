@@ -6,14 +6,12 @@ import java.net.UnknownHostException;
 
 import javax.xml.bind.JAXBException;
 
-import sun.jkernel.DownloadManager;
 import team3.src.client.AbstractClient;
 import team3.src.exception.IllegalCommandException;
 import team3.src.message.AbstractMessage;
 import team3.src.message.response.AbstractResponse;
 import team3.src.protocol.ClientProtocol;
 import team3.src.util.ConfigData;
-import team3.src.util.SSLEncryptor;
 
 
 /**
@@ -36,14 +34,9 @@ public class Client extends AbstractClient {
         while(checkIsNotDone()){
             try{
                 String[] commandArgs = testIsNotFirstRequest()? parseCommand(): parseCommand(args);
-                if(commandArgs[0].equals("my directory")){ 
-                    getDirectory(commandArgs);
-                }
-                else if(commandArgs[0].equals("bye")){
-                    thenClientIsDone();   
-                }
-                else if (commandArgs[0].equals("encryptify"))
-                {
+                if(commandArgs[0].equals("my directory")) getDirectory(commandArgs);  
+                else if(commandArgs[0].equals("bye")) thenClientIsDone();   
+                else if (commandArgs[0].equals("encryptify")) {
                 	out.println("changing encryption to " + commandArgs[1]);
                 	changeEncryptionAlgorithm(commandArgs[1]);
                 }

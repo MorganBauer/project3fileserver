@@ -15,13 +15,13 @@ import java.io.RandomAccessFile;
  */
 public final class Data2MsgUtil {
 	/** Set this flag if we want verbose output */
-	private boolean verbose;
+	private  boolean verbose;
 	/** Constant kilobyte*/
-	private static final int KILOBYTE = 1024;
+	private  final int KILOBYTE = 1024;
 	/** Name of file currently being serviced */
-	private String filename="";
+	private  String filename="";
 	/** Name of current base64 tempFile */
-	private String base64DataFile = "";
+	private  String base64DataFile = "";
 	
 	/**
 	 * Responsible for grabbing chunkSize worth of converted base64 data from tempFile
@@ -45,9 +45,12 @@ public final class Data2MsgUtil {
 	 * @throws FileNotFoundException if we can not find file represented by fName
 	 */
 	private void convertDataToString(String fName) throws FileNotFoundException, IOException{
-		File newFile = File.createTempFile("tmp", ".b64data", null);
+	    File newFile;
+		if(base64DataFile == null){
+		    newFile = File.createTempFile("tmp", ".b64data", null);
+		    base64DataFile = newFile.getAbsolutePath();
+		}else newFile = new File(base64DataFile);
 		filename = fName;
-		base64DataFile = newFile.getAbsolutePath();
 		File file = new File(filename);
 		if(verbose) out.println("Filesize: "+file.length());
 		byte[] buffer = new byte[(int) file.length()];
@@ -57,7 +60,6 @@ public final class Data2MsgUtil {
 		String data = Base64.encode(buffer);
 		newFileStream.write(data);
 		newFileStream.flush();
-		newFileStream.close();
 		if(verbose) out.println("TempFile Length: "+newFile.length());
 	}
 	

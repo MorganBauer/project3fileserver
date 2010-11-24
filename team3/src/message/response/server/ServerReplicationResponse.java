@@ -22,6 +22,8 @@ public final class ServerReplicationResponse extends AbstractResponse {
     private String filename;
     @XmlAttribute(required=true)
     private boolean isLast;
+    @XmlAttribute(required=true)
+    private boolean isData;
     
     public boolean isLast(){
         return isLast;
@@ -35,6 +37,10 @@ public final class ServerReplicationResponse extends AbstractResponse {
         return filename;
     }
     
+    public final boolean hasData(){
+        return isData;
+    }
+    
     /**
      * Read the data...
      */
@@ -42,10 +48,20 @@ public final class ServerReplicationResponse extends AbstractResponse {
         return base64Data;
     }
     
+    private ServerReplicationResponse(String filename){
+        this.filename = filename;
+        this.base64Data = null;
+        this.isData = false;
+        this.isLast = false;
+        
+    }
+    
     private ServerReplicationResponse(String filename, String base64Data, boolean isLast){
         this.filename = filename;
         this.base64Data = base64Data;
         this.isLast = isLast;
+        this.isData = true;
+        
     }
     
     private ServerReplicationResponse(){}
@@ -59,5 +75,13 @@ public final class ServerReplicationResponse extends AbstractResponse {
      */
     public static ServerReplicationResponse buildReplicationMessage(String filename, String base64Data, boolean isLast){
         return new ServerReplicationResponse(filename, base64Data, isLast);
+    }
+    /**
+     * Creates an ServerDataResponse Init msg
+     * @param filename
+     * @return
+     */
+    public static ServerReplicationResponse buildReplicationInitMessage(String filename){
+        return new ServerReplicationResponse(filename);
     }
 }

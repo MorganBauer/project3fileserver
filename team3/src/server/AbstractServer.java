@@ -7,6 +7,7 @@ import static java.lang.System.setProperty;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -14,6 +15,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import javax.xml.bind.JAXBException;
@@ -21,11 +23,14 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import team3.src.message.AbstractMessage;
 import team3.src.message.Message;
+import team3.src.message.ServerMessageFactory;
 import team3.src.message.client.AbstractClientMessage;
+import team3.src.protocol.ServerClientProtocol;
 import team3.src.util.ConfigData;
 import team3.src.util.Triple;
 
 import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLSocket;
 
 /**
  * Abstraction of our server process
@@ -49,7 +54,9 @@ public abstract class AbstractServer {
     /** The hostname of this server*/
     private static String hostname;
     
-
+    protected static ConcurrentHashMap<String, Long> filenameAndDate = new ConcurrentHashMap<String,Long>();
+    protected static ArrayList<ServerInfo> servers = new ArrayList<ServerInfo>();
+    
     /**
      * Sets sssl properties... rtfm
      */
@@ -73,7 +80,16 @@ public abstract class AbstractServer {
         }
     }
     
-    
+    protected final void updateDir(String hostname, int port, HashMap<String, Long> dir){
+        synchronized(servers){
+            for(ServerInfo server : servers){
+                if(server.getHostname().equals(hostname)){
+                    server.updateDirectory(dir);
+                }
+            }
+        }
+        
+    }
     
     protected static void removeMe(){
         data.removeServer(hostname, port);
@@ -85,15 +101,19 @@ public abstract class AbstractServer {
      */
     protected static ConfigData getData(){ return data; }
     
-    protected static HashMap<String, Long> filenameAndDate = new HashMap<String,Long>();
-    protected static ArrayList<ServerInfo> servers = new ArrayList<ServerInfo>();
     
     
-    protected static final void updateFileTable(){
+    protected static final synchronized void updateFileTable(){
         File dir = new File(getProperty("user.dir"));
-        for(File file:dir.listFiles() ) filenameAndDate.put(file.getName(), file.lastModified());
+        for(File file:dir.listFiles(new FilenameFilter(){
+            public boolean accept(File dir, String name) {
+                return !(name.startsWith(".") || name.endsWith(".java") || 
+                         name.endsWith(".class") || name.endsWith("ini")||
+                         name.endsWith(".xsd") || name.equals("makefile") ||
+                         name.endsWith(".xml") || name.equals("mySrvKeystore") ||
+                         new File(name).isDirectory());
+            } }) ) filenameAndDate.put(file.getName(), file.lastModified());
     }
-    
     protected static final void printFileTable(){
         for(Map.Entry<String, Long> keyVal:filenameAndDate.entrySet()) out.println(String.format("%s: %d", keyVal.getKey(), keyVal.getValue()));
     }
@@ -146,7 +166,6 @@ public abstract class AbstractServer {
         try{
             socket.close();
         }catch(IOException e){ 
-            //logger.log(errorHandler.handleSocketIOException(SocketError.INACCESSIBLE_STREAM));
         }
     }
     
@@ -184,11 +203,11 @@ public abstract class AbstractServer {
             return new ServerInfo(hostname, port);
         }
         
-        public Triple<ArrayList<String>,ArrayList<String>,ArrayList<String>> getDiffs(HashMap<String, Long> otherDir, AbstractClientMessage msg){
+        public Triple<ArrayList<String>,ArrayList<String>,ArrayList<String>> getDiffs(ConcurrentHashMap<String, Long> filenameAndDate, AbstractMessage embedMsg){
             ArrayList<String> iHaveRecent = new ArrayList<String>(),
                               theyHaveRecent = new ArrayList<String>(), 
                               theyHaveIt = new ArrayList<String>();
-            for(Map.Entry<String, Long> keyVal: otherDir.entrySet()){
+            for(Map.Entry<String, Long> keyVal: filenameAndDate.entrySet()){
                 if(directory.containsKey(keyVal.getKey())){
                     int comp = directory.get(keyVal.getKey()).compareTo(keyVal.getValue());
                     if(comp < 0)
@@ -196,8 +215,8 @@ public abstract class AbstractServer {
                     else if(comp > 0)
                         iHaveRecent.add(keyVal.getKey());
                     
-                }else if(msg.getMsgType() == Message.Type.DELETE)
-                    if(msg.read().equals(keyVal.getKey())) theyHaveIt.add(keyVal.getKey());
+                }else if(embedMsg.getMsgType() == Message.Type.DELETE)
+                    if(embedMsg.read().equals(keyVal.getKey())) theyHaveIt.add(keyVal.getKey());
             }
             return new Triple<ArrayList<String>,ArrayList<String>,ArrayList<String>>(iHaveRecent, theyHaveRecent, theyHaveIt);
         }
@@ -220,7 +239,10 @@ public abstract class AbstractServer {
         ///** Responsible for logging this thread's activities */
         //protected Logger serverLogger;
         ///** Communication channel related to client. */
-        protected Socket client;
+        protected SSLSocket client;
+        
+        protected ServerClientProtocol protocol;
+        protected ServerMessageFactory serverFactory;
         
         private boolean isDone;
         
@@ -254,10 +276,9 @@ public abstract class AbstractServer {
          *  @throws IOException if unable to read from instream
          * @throws JAXBException 
          */
-        protected AbstractMessage readInstream() throws IOException, JAXBException{
+        protected String readInstream() throws IOException{
             String msg = serverIn.readLine();
-            AbstractMessage ret = AbstractMessage.unmarshal(msg);
-            return ret;
+            return msg;
         }
         
         /**

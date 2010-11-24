@@ -1,10 +1,12 @@
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -17,17 +19,22 @@ import javax.xml.bind.JAXBException;
 
 import team3.src.message.AbstractMessage;
 import team3.src.message.Message;
+import team3.src.message.ServerMessageFactory;
 import team3.src.message.client.AbstractClientMessage;
 import team3.src.message.client.FilePutMessage;
 import team3.src.message.response.AbstractResponse;
 import team3.src.message.response.FileGetResponse;
 import team3.src.message.response.Response;
 import team3.src.message.response.server.ServerReplicationResponse;
+import team3.src.message.server.AbstractServerMessage;
+import team3.src.message.server.ServerDirectoryMessage;
 import team3.src.message.server.ServerPulseMessage;
+import team3.src.message.server.ServerReplicationMessage;
 import team3.src.protocol.IntraServerProtocol;
 import team3.src.protocol.ServerClientProtocol;
 import team3.src.server.AbstractServer;
 import team3.src.util.SSLEncryptor;
+import team3.src.util.Triple;
 
 
 
@@ -50,6 +57,7 @@ public class Server extends AbstractServer {
     
     private static IntraServerProtocol serverProtocol = IntraServerProtocol.getProtocol(getHostname(), port, 1024);
     
+    @SuppressWarnings(value = { "unused" })
     private static UpdatePulse pulsor;
     
     /**
@@ -238,17 +246,16 @@ public class Server extends AbstractServer {
                                         //TODO: Deal with locks and priorities...
                                         switch(first.getMode()){
                                         case READ:
-                                        {
+                                        
                                             if(getReadLock()){
                                                 //README!! WORKER MUST RELEASE LOCK IN WORKER THREAD!!
                                                 WorkerThread thread = new WorkerThread(first);
                                                 thread.start();
                                                 //README!! WORKER MUST RELEASE LOCK IN WORKER THREAD!!
                                             }else priorityPool.add(first);
-                                            break;
-                                            
-                                        }
-                                        case WRITE:{
+                                            break; 
+                                        case UPDATE:
+                                        case WRITE:
                                             if(getWriteLock()){
                                                 //README!! WORKER MUST RELEASE LOCK IN WORKER THREAD!!!
                                                 WorkerThread thread = new WorkerThread(first);
@@ -257,7 +264,25 @@ public class Server extends AbstractServer {
                                             }else 
                                             	{priorityPool.add(first);}
                                             break;
-                                        }
+                                        case REPLICATE:
+                                            ServerReplicationMessage msg = (ServerReplicationMessage) first.getCurrentMsg();
+                                            if(msg.getHost().equals(getHostname()) && msg.getPort() == port){
+                                                if(getReadLock()){
+                                                  //README!! WORKER MUST RELEASE LOCK IN WORKER THREAD!!!
+                                                    WorkerThread thread = new WorkerThread(first);
+                                                    thread.start();
+                                                  //README!! WORKER MUST RELEASE LOCK IN WORKER THREAD!!!
+                                                }else priorityPool.add(first);
+                                                break;
+                                            }else{
+                                                if(getWriteLock()){
+                                                  //README!! WORKER MUST RELEASE LOCK IN WORKER THREAD!!!
+                                                    WorkerThread thread = new WorkerThread(first);
+                                                    thread.start();  
+                                                  //README!! WORKER MUST RELEASE LOCK IN WORKER THREAD!!!
+                                                }else priorityPool.add(first);
+                                                break;
+                                            }
                                         default: throw new AssertionError(first.getMode());
                                         }
                                     }else{ priorityPool.add(first); }
@@ -331,6 +356,7 @@ public class Server extends AbstractServer {
          * If the worker calling this thread is the last reader, it is responsible for 
          * reader cleanup (releasing read lock for writer to come in).
          */
+        
         public void releaseReadLock(){
             synchronized(readerInLock){
                 //logger.log("READ LOCK --"+"READERS: "+(readSemaphore-1));
@@ -347,6 +373,8 @@ public class Server extends AbstractServer {
                 //logger.log("WRITE LOCK RELEASED");
             }
         }
+       
+        
         
         /**
          * Thread responsible for the communication with the client
@@ -356,7 +384,9 @@ public class Server extends AbstractServer {
         private class WorkerThread extends AbstractServerThread{
             private PrioritySocket socket;
             private AbstractMessage message;
+            private SSLSocket serverSocket;
             private ServerClientProtocol protocol;
+            private ServerMessageFactory serverFactory;
             
             private WorkerThread(final PrioritySocket pSocket){
                 super(pSocket.getID());
@@ -377,13 +407,14 @@ public class Server extends AbstractServer {
                     out.println("Not ended...");
                     out.println(message);
                     try{
-                        message = (message == null)?readInstream():message;
+                        message = (message == null)? AbstractMessage.unmarshal(readInstream()):message;
                         switch(message.getMsgType()){
                             case ATOMIC:
                             case DELETE:
                                 response = protocol.generateResponse(message);
                                 prepareToFinish();
                                 out.println("Finishing!");
+                                message = null;
                                 break;
                             case READ:
                             case WRITE:
@@ -409,31 +440,54 @@ public class Server extends AbstractServer {
                                     default:
                                         prepareToFinish();
                                         response = protocol.createErrorMessage(message);
+                                        break;
+                                    
                                 }
                                 if(response.getType() == Response.Type.ERROR) prepareToFinish();
+                                message = null;
                                 break;
                             case PULSE:
                                 out.println("GOT PULSE!");
                                 out.println(message);
                                 response = null;
                                 prepareToFinish();
+                                message = null;
+                                break;
+                            case UPDATE:
+                                out.println("GOT UPDATE");
+                                updateDirMsg((ServerDirectoryMessage) message);
+                                response = null;
+                                message = null;
                                 break;
                             case REPLICATE:
-                                response = serverProtocol.generateResponse(message);
-                                if(((ServerReplicationResponse) response).isLast()){
-                                    out.println("Last Server Replication Message");
-                                    prepareToFinish();
+                                ServerReplicationMessage msg = (ServerReplicationMessage) message;
+                                if(msg.isCreator(getHostname(), port)){
+                                    response = AbstractResponse.unmarshal(readInstream());
+                                    switch(response.getType()){
+                                        case DATA_IN:
+                                            message = serverProtocol.receiveServerData(msg.getHost(), msg.getPort(), (ServerReplicationResponse)response);
+                                            out.println(message.toString());
+                                            writeOutstream(message.marshal());
+                                            if(((ServerReplicationResponse) response).isLast()){
+                                                prepareToFinish();
+                                            }
+                                            response = null;
+                                    }
+                                }else{
+                                    response = serverProtocol.generateResponse(message);
+                                    out.println(response);
+                                    if(((ServerReplicationResponse) response).isLast()){
+                                        out.println("Last Server Replication Message");
+                                        prepareToFinish();
+                                        message = null;
+                                    }
                                 }
                                 break;
-                            case VOTE:
-                                response = serverProtocol.generateResponse(message);
-                                break;
-                                
                             default:
                                 response = null;
                                 prepareToFinish();
                         }
-                        message = null;
+                        
                         if(response!= null){
                             writeOutstream(response.marshal());
                         }
@@ -457,15 +511,86 @@ public class Server extends AbstractServer {
                     break;
                 case WRITE:
                 case DELETE:
+                    AbstractClientMessage msg = (AbstractClientMessage)socket.getCurrentMsg();
                     protocol.backupDirectory();
                     work();
                     releaseWriteLock();
+                    protocol.backupDirectory();
+                    try { sendUpdateMsg(msg); } 
+                    catch (UnknownHostException e) { e.printStackTrace(); } 
+                    catch (IOException e) { e.printStackTrace(); } 
+                    catch (JAXBException e) { e.printStackTrace(); }
                     break;
                 case ATOMIC:
                 case PULSE:
                     work();
                     break;
+                case UPDATE:
+                    protocol.backupDirectory();
+                    work();
+                    releaseWriteLock();
+                case REPLICATE:
+                    if(!((ServerReplicationMessage) socket.getCurrentMsg()).isCreator(getHostname(), port)){
+                        protocol.backupDirectory();
+                        work();
+                        releaseWriteLock();
+                        protocol.backupDirectory();
+                    }else{
+                        work();
+                        releaseReadLock();
+                    }
+                    break;
                 default: throw new AssertionError(socket.getMode()); // WE SHOULDNT GET HERE... FAIL FAST...
+                }
+            }
+            
+            /**
+             * Responsible for sending update messages to 
+             * other servers so they know about the changes...
+             * @throws IOException 
+             * @throws UnknownHostException 
+             * @throws JAXBException 
+             */
+            private final void sendUpdateMsg(AbstractMessage msg) throws UnknownHostException, IOException, JAXBException{
+                synchronized(servers){
+                    for(ServerInfo server: servers){
+                        AbstractServerMessage dirMsg = serverFactory.createDirectoryMessage(getHostname(), port, filenameAndDate, msg);
+                        serverSocket = (SSLSocket)SSLSocketFactory.getDefault().createSocket(server.getHostname(), server.getPort());
+                        PrintWriter outStream = new PrintWriter(serverSocket.getOutputStream());
+                        outStream.println(dirMsg.marshal());
+                        outStream.flush();
+                    }
+                }
+            }
+            private final void updateDirMsg(ServerDirectoryMessage msg) throws JAXBException, UnknownHostException, IOException{
+                ServerInfo updatedServer = null;
+                AbstractMessage embedMsg = null;
+                Triple<ArrayList<String>, ArrayList<String>, ArrayList<String>> diffs;
+                synchronized(servers){
+                    for(ServerInfo server : servers)
+                        if(server.getHostname().equals(msg.getHostname()))
+                            if(server.getPort() == msg.getPort()){
+                                server.updateDirectory(msg.getDirList());
+                                updatedServer = server;
+                                break;
+                            }
+                    if(updatedServer == null){
+                        updatedServer = ServerInfo.makeServerInfo(msg.getHostname(), msg.getPort());
+                        servers.add(updatedServer);
+                    }
+                    embedMsg = AbstractMessage.unmarshal(msg.read());
+                    diffs = updatedServer.getDiffs(filenameAndDate, embedMsg);
+                }
+                for(String file : diffs.getSecond()){
+                    SSLSocket server = (SSLSocket) SSLSocketFactory.getDefault().createSocket(msg.getHostname(), msg.getPort());
+                    AbstractMessage request = serverFactory.createReplicationMessage(getHostname(), port, file);
+                    PrioritySocket socket = PrioritySocket.wrapSocket(server, request);
+                    priorityPool.add(socket);
+                }
+                for(String file : diffs.getThird()){
+                    if(file.equals(embedMsg.read()))
+                        new File(file).delete();
+                        out.println(String.format("%s was deleted.", file));
                 }
             }
         }
