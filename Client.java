@@ -6,15 +6,12 @@ import java.net.UnknownHostException;
 
 import javax.xml.bind.JAXBException;
 
-import sun.jkernel.DownloadManager;
 import team3.src.client.AbstractClient;
 import team3.src.exception.IllegalCommandException;
 import team3.src.message.AbstractMessage;
 import team3.src.message.response.AbstractResponse;
 import team3.src.protocol.ClientProtocol;
 import team3.src.util.ConfigData;
-import team3.src.util.SSLEncryptor;
-
 
 /**
  * The client 
@@ -35,7 +32,7 @@ public class Client extends AbstractClient {
         out.println(configData.toString());
         while(checkIsNotDone()){
             try{
-                String[] commandArgs = testIsNotFirstRequest()? parseCommand(): parseCommand(args);
+                final String[] commandArgs = testIsNotFirstRequest()? parseCommand(): parseCommand(args);
                 if(commandArgs[0].equals("my directory")){ 
                     getDirectory(commandArgs);
                 }
@@ -85,11 +82,14 @@ public class Client extends AbstractClient {
         }
         public void run(){
             //TODO: logger.log("Client Thread "+getName()+" has started!");
-        	StringBuilder init = new StringBuilder();
+        	final StringBuilder init = new StringBuilder();
             //String init = "";
             AbstractMessage toServer;
             AbstractResponse fromServer;
-            for(String arg : commandArgs) init.append(arg+" ");
+            for(String arg : commandArgs) 
+            	{
+            		init.append(arg+" ");
+            	}
             try{
                 toServer = protocol.handleInput(commandArgs, getName());
                 initConnection();

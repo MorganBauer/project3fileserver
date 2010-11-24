@@ -9,7 +9,7 @@ import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.Semaphore;
 
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -183,7 +183,7 @@ public class Server extends AbstractServer {
      *
      */
     protected static class PriorityServerThread extends Thread{
-        private volatile Integer readSemaphore = 0;
+        private final Semaphore readSemaphore = new Semaphore(Integer.MAX_VALUE, true);
         private volatile Boolean writerIn = false;
         private final Object writerInLock = new Object();
         private volatile Boolean readerIn = false;
@@ -305,7 +305,7 @@ public class Server extends AbstractServer {
                     if(writerIn)return false;
                     else{
                         readerIn = true;
-                        readSemaphore++;
+                        readSemaphore.acquire();
                         //logger.log("READ LOCK ++"+"READERS: "+readSemaphore);
                         return true;
                     }
@@ -322,7 +322,7 @@ public class Server extends AbstractServer {
             synchronized(readerInLock){
                 synchronized(writerInLock){
                     //logger.log("WRITE LOCK OBTAINED? "+ !(readerIn || readSemaphore > 0 || writerIn));
-                    return (writerIn = !(readerIn || readSemaphore > 0 || writerIn));
+                    return (writerIn = !(readerIn || readSemaphore.hasQueuedThreads() || writerIn));
                 }
             }
         }
@@ -334,7 +334,9 @@ public class Server extends AbstractServer {
         public void releaseReadLock(){
             synchronized(readerInLock){
                 //logger.log("READ LOCK --"+"READERS: "+(readSemaphore-1));
-                if(--readSemaphore == 0) readerIn = false;
+                readSemaphore.release();
+                if (!readSemaphore.hasQueuedThreads())
+                	{readerIn = false;}
             }
         }
         /**
