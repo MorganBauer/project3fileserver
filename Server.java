@@ -255,6 +255,7 @@ public class Server extends AbstractServer {
                                             }else priorityPool.add(first);
                                             break; 
                                         case UPDATE:
+                                        case DELETE:
                                         case WRITE:
                                             if(getWriteLock()){
                                                 //README!! WORKER MUST RELEASE LOCK IN WORKER THREAD!!!
@@ -347,7 +348,7 @@ public class Server extends AbstractServer {
             synchronized(readerInLock){
                 synchronized(writerInLock){
                     //logger.log("WRITE LOCK OBTAINED? "+ !(readerIn || readSemaphore > 0 || writerIn));
-                    return (writerIn ^= (readerIn || readSemaphore > 0 || writerIn));
+                    return (writerIn = !(readerIn || readSemaphore > 0 || writerIn));
                 }
             }
         }
