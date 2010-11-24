@@ -99,7 +99,7 @@ public class Logger extends Thread{
 			html.write("</tr>");
 		}
 		html.write("</table>");
-		html.write("<B>Last 5 updates in the system <br /> </B> \n");
+		html.write("<B>Recent updates in the system <br /> </B> \n");
 		for (int i=0;i<list.size();i++)
 		{
 			html.write(list.get(i));
@@ -110,12 +110,23 @@ public class Logger extends Thread{
 		html.write("</html>");
 		html.close();
 	}
-	public static void main(String[]args) throws IOException {
-		Logger logServer = new Logger(9345);
-		logServer.start();
-		out.println("Log server started. press return to finish logging with the next incoming message");
-		InputStreamReader i = new  InputStreamReader(System.in);
-		i.read();
-		logServer.endLogging=true;
+	public static void main(String[]args) {
+		if (args.length != 1)
+		{
+			out.println("Port number should be the command line arguement, exiting now..");
+			System.exit(1);
+		}
+		try{
+			Logger logServer = new Logger(Integer.parseInt(args[0]));
+			logServer.start();
+			out.println("Log server started. press return to finish logging with the next incoming message");
+			InputStreamReader i = new  InputStreamReader(System.in);
+			i.read();
+			logServer.endLogging=true;
+		}
+	    catch( IOException e){
+	    	out.println("Port Not available exiting now..");
+			System.exit(1);
+	    }
     }
 }
