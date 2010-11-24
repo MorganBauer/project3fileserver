@@ -91,7 +91,7 @@ public class Logger extends Thread{
 		html.write("<html>");
 		html.write("<B>Server Load Table <br /> </B>");
 		html.write("<table border=\"1\">");
-		ServerLoad.put(message.getHostName(),message.getLoad());
+		ServerLoad.put(message.getHostName() + "-" +message.getPort(),message.getLoad());
 		for (Map.Entry<String, String> e : ServerLoad.entrySet()) {
 			html.write("<tr>");
 			html.write("<td>" + e.getKey() +"</td>");
