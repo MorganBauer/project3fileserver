@@ -73,7 +73,6 @@ public class Server extends AbstractServer {
 
 
     private static void sendWait(final Socket client, final AbstractResponse msg) throws IOException{
-        out.println(msg);
         final PrintWriter writer = new PrintWriter(client.getOutputStream());
         writer.println(msg);
         writer.flush();
@@ -349,7 +348,7 @@ public class Server extends AbstractServer {
             synchronized(readerInLock){
                 synchronized(writerInLock){
                     //logger.log("WRITE LOCK OBTAINED? "+ !(readerIn || readSemaphore > 0 || writerIn));
-                    return (writerIn =! (readerIn || readSemaphore > 0 || writerIn));
+                    return (writerIn = !(readerIn || readSemaphore > 0 || writerIn));
                 }
             }
         }

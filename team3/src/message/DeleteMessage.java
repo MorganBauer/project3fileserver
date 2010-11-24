@@ -1,5 +1,7 @@
 package team3.src.message;
 
+
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -17,15 +19,14 @@ public class DeleteMessage extends AbstractClientMessage {
 
     @XmlElement(required=true)
     private String filename;
-    
+        
     /**
      * Gives the name of the file we would like to delete
      */
     public String read() {
         return filename;
     }
-    
-    
+     
     private DeleteMessage() { }
     
     private DeleteMessage(String id, int priority, String filename){
