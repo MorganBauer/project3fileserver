@@ -1,10 +1,5 @@
 package team3.src.message.client;
 
-import java.io.ByteArrayInputStream;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -28,6 +23,7 @@ public abstract class AbstractClientMessage extends AbstractMessage  {
 
 	
 	public String getID(){ return clientID; }
+	
 	public int getPriority(){ return priority; }
 	
 
