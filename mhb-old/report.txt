@@ -1,0 +1,86 @@
+Morgan Bauer
+COP5615
+UFID 9890-4838
+bauerm@ufl.edu
+bauer.morgan@gmail.com
+mhb@cise.ufl.edu
+
+*** CAUTION ***
+This project requires JDK 1.6 or higher.
+
+Project 2
+
+do 'make' to make everything
+'make server' will make everything
+'make client' will make everything
+'make clean' destroys class files
+
+do 'java server' to run the server. it reads in the port number in 'config.ini'
+   Once the server is running, it is autonomous, and does not require further
+   attention. Unless it crashes, at which point it needs to be restarted.  upon
+   startup, it reads the config.ini and writes a new, correct one. This will
+   work unless something is weird with the network, or the network is not
+   visible to the internet. I did this because it was very helpful development
+   wise.
+
+do 'java client' to run the client. Once the client is started it performs
+   interactively. please type commands such as < hello | directory list | file
+   put | file get | terminate | delete >
+
+The clien no longer accepts command line args. You must start it, and then start
+typing the requests to the prompt.
+
+* Priority
+
+Setting priority is done at the command prompt.  Do the word 'priority' a space,
+and then a number indicating the level.  e.g. 'priority 8' for priority level 8
+This sets the priority for the current session, and may be reset at any
+time. Priority is of type Int, and thus there are many many levels, including
+negative ones.
+
+If a command is not recognized, a generic packet is not sent to the server and
+the server responds. Instead the client waits for mor input.
+
+when getting a file, 'client-hostnameclient@' is prefixed on the filename
+
+when putting a file, 'server@' is prefixed to the filename
+
+I leveraged java's OO-ness. I sent objects over the sockets. This allowed me to
+subclass them into specific types and features. This also made it easy to
+process and send things like the file listings and bytestreams. I did not
+convert anything into a char stream like most other people did.
+
+I did not implement aborting transfers. I did not implement the failure codes.
+
+What i learned - Java's exception system is terrible I miss inferred typing, and
+                 dynamic typing. Java does indeed run with minimal trouble on
+                 other machines. Sun01 needs an updated jdk.
+
+What challenges - Java's exception system is terrible. The spec was
+                  awful. Please contact me at bauer.morgan@gmail.com if you
+                  would like me to review your next document before it goes
+                  out. I can check for grammar and clarity.
+
+How I overcame the challenges - I did whatever I felt like. I did not implement
+                                aborting transfers. I ignored almost all
+                                exceptions by making my methods 'throws
+                                Exceptions'. I did not generate failcodes. I
+                                used a ReentrantReadWriteLock and a
+                                PriorityBlockingQueue for their concurrent
+                                abilities so that ServerThreads would not step
+                                on each other when interacting with the filee
+                                system.
+
+Observations - Still cannot write a spec. Java is overly verbose. The exception
+               system is terrible.
+
+Improvements - I think the spec could be better. Contact me at
+               bauer.morgan@gmail.com to set up an appointment.
+
+Interesting facts - I was sick up until about 3 hours before due. Luckily I
+                    started early. Still, most everything not related to
+                    multithreading it was done in those last few hours. Imagine
+                    if I actually had time. I fully developed this on a Windows
+                    computer, and it worked immediately once I got over to the
+                    Linux computers.
+
