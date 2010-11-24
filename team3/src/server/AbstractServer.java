@@ -69,6 +69,14 @@ public abstract class AbstractServer {
     
     private static ConfigData data;
     
+    protected static int getLogPort(){
+        return Integer.parseInt(data.get("log-server-port"));
+    }
+    
+    protected static String getLogHostname(){
+        return data.get("log-server-hostname");
+    }
+    
     protected static void initData(){
         try { data = ConfigData.getConfigData(); } 
         catch (IOException e) { throw new AssertionError("WHERE IS UR CONFIGDATA FILE??"); }
