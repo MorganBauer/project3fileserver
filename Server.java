@@ -3,6 +3,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -18,6 +20,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.xml.bind.JAXBException;
 
 import team3.src.message.AbstractMessage;
+import team3.src.message.LogMessage;
 import team3.src.message.Message;
 import team3.src.message.ServerMessageFactory;
 import team3.src.message.client.AbstractClientMessage;
@@ -33,6 +36,7 @@ import team3.src.message.server.ServerReplicationMessage;
 import team3.src.protocol.IntraServerProtocol;
 import team3.src.protocol.ServerClientProtocol;
 import team3.src.server.AbstractServer;
+import team3.src.util.ConfigData;
 import team3.src.util.SSLEncryptor;
 import team3.src.util.Triple;
 
@@ -151,6 +155,20 @@ public class Server extends AbstractServer {
         Timer timer;
         TimerTask task = new TimerTask(){
             public void run(){
+            	try{
+            		ConfigData data = ConfigData.getConfigData();
+            	    String LogHost = data.get("log-server-hostname");
+        	        InetAddress LogIP = InetAddress.getByName(LogHost);
+        	        int LogPort = Integer.parseInt(data.get("log-server-port"));
+        	        LogMessage log = LogMessage.buildLogStatusMessage(getHostname(), port, "STATUS", String.valueOf(priorityPool.size())); 
+                    byte[] logB = log.marshal().getBytes();
+                    DatagramPacket pkt = new DatagramPacket(logB,logB.length,LogIP,LogPort);
+                    DatagramSocket sock = new DatagramSocket();
+                    sock.send(pkt);
+            	}
+            	catch(Exception e){
+            		e.printStackTrace();
+            	}
                for(ServerInfo server:servers){
                    try {
                     SSLSocket otherServer = (SSLSocket)SSLSocketFactory.getDefault().createSocket(server.getHostname(), server.getPort());
