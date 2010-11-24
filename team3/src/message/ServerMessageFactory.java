@@ -67,6 +67,7 @@ public final class ServerMessageFactory{
     public AbstractServerMessage createDirectoryMessage(String hostname,
             int port, ConcurrentHashMap<String, Long> filenameAndDate, AbstractMessage msg) {
         try{
+            System.out.println(msg.marshal());
             return buildDirectoryMessage(hostname, port, filenameAndDate, msg.marshal());
         }catch(JAXBException e){ throw new AssertionError("ACCESS TO jaxb.index??"); }
        

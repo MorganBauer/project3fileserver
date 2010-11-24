@@ -416,6 +416,7 @@ public class Server extends AbstractServer {
                 super(pSocket.getID());
                 this.socket = pSocket;
                 this.protocol = ServerClientProtocol.getProtocol(pSocket.getID());
+                serverFactory = ServerMessageFactory.getFactory();
             }
             
             /**
@@ -428,8 +429,6 @@ public class Server extends AbstractServer {
                 AbstractResponse response;
                 message = socket.getCurrentMsg();
                 while(weCantStop()){
-                    out.println("Not ended...");
-                    out.println(message);
                     try{
                         message = (message == null)? AbstractMessage.unmarshal(readInstream()):message;
                         switch(message.getMsgType()){
@@ -471,8 +470,6 @@ public class Server extends AbstractServer {
                                 message = null;
                                 break;
                             case PULSE:
-                                out.println("GOT PULSE!");
-                                out.println(message);
                                 response = null;
                                 prepareToFinish();
                                 message = null;
@@ -578,6 +575,7 @@ public class Server extends AbstractServer {
             private final void sendUpdateMsg(AbstractMessage msg) throws UnknownHostException, IOException, JAXBException{
                 synchronized(servers){
                     for(ServerInfo server: servers){
+                        out.println(msg);
                         AbstractServerMessage dirMsg = serverFactory.createDirectoryMessage(getHostname(), port, filenameAndDate, msg);
                         serverSocket = (SSLSocket)SSLSocketFactory.getDefault().createSocket(server.getHostname(), server.getPort());
                         PrintWriter outStream = new PrintWriter(serverSocket.getOutputStream());
