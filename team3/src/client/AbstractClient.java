@@ -341,7 +341,7 @@ public class AbstractClient {
         protected void initConnection() throws UnknownHostException, IOException{
             //config data map has 2 entries per server and 1 for chunk size and 1 for client ID
             //maximum gives the max number of servers in config file
-            int maximum = ((data.getSize()/2)-1);
+            int maximum = ((data.getSize()-4)/2);
             //int host;
             do{
             	hostNumber = (int)((Math.random()*maximum)+1);
