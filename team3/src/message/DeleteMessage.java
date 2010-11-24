@@ -1,10 +1,10 @@
 package team3.src.message;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import team3.src.message.Message;
+import team3.src.message.client.AbstractClientMessage;
 
 /**
  * Message that is sent to request that a file be removed
@@ -13,16 +13,11 @@ import team3.src.message.Message;
  */
 @XmlRootElement(name="DeleteMessage")
 @Message(Message.Type.DELETE)
-public class DeleteMessage extends AbstractMessage {
+public class DeleteMessage extends AbstractClientMessage {
 
     @XmlElement(required=true)
     private String filename;
     
-    @XmlAttribute(required=true)
-    private String id;
-    
-    @XmlAttribute(required=true)
-    private int priority;
     /**
      * Gives the name of the file we would like to delete
      */
@@ -30,20 +25,11 @@ public class DeleteMessage extends AbstractMessage {
         return filename;
     }
     
-    /**
-     * Get the priority of a client sending delete message
-     * <br> WILL RETURN 0 for Server sending message
-     * @return priority
-     */
-    public int getPriority(){
-        return priority;
-    }
     
     private DeleteMessage() { }
     
     private DeleteMessage(String id, int priority, String filename){
-        this.id = id;
-        this.priority = priority;
+        super(id, priority);
         this.filename = filename;
     }
     /**
@@ -60,10 +46,6 @@ public class DeleteMessage extends AbstractMessage {
     
     public String toString(){
         return String.format("%s requesting to delete %s, with importance of %d.",getID(), filename, getPriority());
-    }
-
-    public String getID() {
-        return id;
     }
     
     /**
