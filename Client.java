@@ -10,6 +10,7 @@ import team3.src.client.AbstractClient;
 import team3.src.exception.IllegalCommandException;
 import team3.src.message.AbstractMessage;
 import team3.src.message.response.AbstractResponse;
+import team3.src.message.response.Response.Type;
 import team3.src.protocol.ClientProtocol;
 import team3.src.util.ConfigData;
 
@@ -81,7 +82,7 @@ public class Client extends AbstractClient {
         	StringBuilder init = new StringBuilder();
             //String init = "";
             AbstractMessage toServer;
-            AbstractResponse fromServer;
+            AbstractResponse fromServer = null;
             for(String arg : commandArgs) init.append(arg+" ");
             try{
                 toServer = protocol.handleInput(commandArgs, getName());
@@ -129,8 +130,16 @@ public class Client extends AbstractClient {
                 		// set server status to dead
                     	blacklistCurrentServer();
                     	//reinit connection
-                		initConnection();
-                		writeToServer(toServer);
+                    	if (fromServer.getType() == Type.DATA_IN)
+                    	{
+                    		initConnection();
+                    		writeToServer(toServer);
+                    	}else if (fromServer.getType() == Type.DATA_OUT)
+                    	{
+                    		initConnection();
+                    		out.println("the you were writing to crashed, please try again");
+                    		prepareToFinish();
+                    	}
                 	}catch(IOException e){ 
                         //TODO: LOGGER!
                     	e.printStackTrace();
