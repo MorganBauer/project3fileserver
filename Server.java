@@ -73,6 +73,7 @@ public class Server extends AbstractServer {
 
 
     private static void sendWait(final Socket client, final AbstractResponse msg) throws IOException{
+        out.println(msg);
         final PrintWriter writer = new PrintWriter(client.getOutputStream());
         writer.println(msg);
         writer.flush();
@@ -255,6 +256,7 @@ public class Server extends AbstractServer {
                                             }else priorityPool.add(first);
                                             break; 
                                         case UPDATE:
+                                        case DELETE:
                                         case WRITE:
                                             if(getWriteLock()){
                                                 //README!! WORKER MUST RELEASE LOCK IN WORKER THREAD!!!
