@@ -1,0 +1,8 @@
+syntax: glob
+*.class
+*.orig
+*.ini
+*.jpg
+*.png
+.DS_Store
+*.xml
