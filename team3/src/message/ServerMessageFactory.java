@@ -2,16 +2,19 @@ package team3.src.message;
 
 import static team3.src.message.DeleteMessage.buildDeleteMessage;
 import static team3.src.message.response.ErrorResponse.buildErrorMessage;
-import static team3.src.message.server.ServerVotingMessage.*;
 import static team3.src.message.server.ServerPulseMessage.*;
 import static team3.src.message.server.ServerReplicationMessage.buildReplicationMessage;
+import static team3.src.message.server.ServerDirectoryMessage.buildDirectoryMessage;
 
-import javax.xml.datatype.XMLGregorianCalendar;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.xml.bind.JAXBException;
 
 import team3.src.message.response.ErrorResponse;
+import team3.src.message.server.AbstractServerMessage;
 import team3.src.message.server.ServerPulseMessage;
 import team3.src.message.server.ServerReplicationMessage;
-import team3.src.message.server.ServerVotingMessage;
 
 public final class ServerMessageFactory{
     public static ServerMessageFactory singleton;
@@ -24,26 +27,9 @@ public final class ServerMessageFactory{
         return (singleton != null)?singleton:(singleton = new ServerMessageFactory());
     }
     
-    /**
-     * Builds a message that asks for data that is not currently on this system
-     * @param host who wants the data
-     * @param port what location
-     * @param filename name of the file we want
-     * @return new replication message
-     */
+    
     public ServerReplicationMessage createReplicationMessage(String host, int port, String filename){
         return buildReplicationMessage(host, port, filename);
-    }
-    
-    /**
-     * Build a message that casts a vote for leadership within distributed system
-     * @param host the hostname of this server
-     * @param port the portnum of this server
-     * @param timestamp When this server was "born." The older the machine, the higher chance it will be accepted as leader
-     * @return a vote message
-     */
-    public ServerVotingMessage createCandidateMessage(String host, int port, XMLGregorianCalendar timestamp){
-        return buildVotingMessage(host, port, timestamp);
     }
     
     /**
@@ -88,4 +74,13 @@ public final class ServerMessageFactory{
 	public ErrorResponse createErrorMessage(String id, AbstractMessage sentMsg, String ecode, String details){
 		return buildErrorMessage(id, sentMsg, ecode, details);
 	}
+
+    public AbstractServerMessage createDirectoryMessage(String hostname,
+            int port, ConcurrentHashMap<String, Long> filenameAndDate, AbstractMessage msg) {
+        try{
+            return buildDirectoryMessage(hostname, port, filenameAndDate, msg.marshal());
+        }catch(JAXBException e){ throw new AssertionError("ACCESS TO jaxb.index??"); }
+       
+    }
+
 }

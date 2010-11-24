@@ -8,11 +8,12 @@ import java.io.IOException;
 
 import team3.src.message.AbstractMessage;
 import team3.src.message.DeleteMessage;
+import team3.src.message.ServerMessageFactory;
 
 import team3.src.message.response.AbstractResponse;
 import team3.src.message.response.IntraServerResponseFactory;
+import team3.src.message.response.server.ServerReplicationResponse;
 import team3.src.message.server.ServerReplicationMessage;
-import team3.src.message.server.ServerVotingMessage;
 import team3.src.util.Data2MsgUtil;
 
 /**
@@ -20,7 +21,7 @@ import team3.src.util.Data2MsgUtil;
  *
  */
 public class IntraServerProtocol extends AbstractProtocol {
-
+    private ServerMessageFactory serverFactory;
     private IntraServerResponseFactory responseFactory;
     private Data2MsgUtil dataToMsgUtil; 
     private String filename;
@@ -33,8 +34,6 @@ public class IntraServerProtocol extends AbstractProtocol {
     
     public AbstractResponse generateResponse(AbstractMessage msg){
         switch(msg.getMsgType()){
-            case VOTE:
-                return handleVote((ServerVotingMessage) msg);
             case REPLICATE:
                 return handleDataTransfer((ServerReplicationMessage) msg);
             case PULSE:
@@ -45,16 +44,22 @@ public class IntraServerProtocol extends AbstractProtocol {
         }
     }
    
-    
-    private AbstractResponse handleVote(ServerVotingMessage msg){
-        //TODO: FIGURE THIS OUT...
-        return null;
+    public AbstractMessage receiveServerData(String host, int port, ServerReplicationResponse response) {
+        if(response.hasData()){
+            try{
+                dataToMsgUtil.base64toData(response.getFilename(), response.read());
+                if(response.isLast()) return null;
+                return serverFactory.createReplicationMessage(host, port, response.getFilename());
+            }catch(IOException e){ return responseFactory.createErrorMessage(host, response, IO_ERROR, "Unable to update file"); }
+        }
+        return serverFactory.createReplicationMessage(host, port, response.getFilename());
     }
     
     private AbstractResponse handleDataTransfer(ServerReplicationMessage msg){
         if(exists(msg.read())) 
             try { 
                 String data = dataToMsgUtil.data2Base64(msg.read(), (msg.read().equals(filename))?(chunkNo=0):(++chunkNo), chunkSize, false);
+                if((((4/3)*data.length())/KILOBYTE < chunkSize)) dataToMsgUtil.cleanup();
                 return responseFactory.createReplicationResponse(msg.read(), data, (((4/3)*data.length())/KILOBYTE < chunkSize)); } 
             catch (IOException e) { return responseFactory.createErrorMessage(this.id, msg, IO_ERROR, "Unable to generate data stripe"); }
         else return responseFactory.createErrorMessage(this.id, msg, FILE_NOT_FOUND, "Unable to find file");
@@ -88,5 +93,7 @@ public class IntraServerProtocol extends AbstractProtocol {
         File file = new File(filename);
         return file.delete();
     }
+
+
 
 }

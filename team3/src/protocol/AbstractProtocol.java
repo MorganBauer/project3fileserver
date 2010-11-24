@@ -4,6 +4,7 @@
 package team3.src.protocol;
 
 import java.io.File;
+import java.io.FilenameFilter;
 
 import team3.src.util.Data2MsgUtil;
 import static java.lang.System.getProperty;
@@ -29,7 +30,13 @@ public abstract class AbstractProtocol {
 	public static final String IO_ERROR = "0x005";
 	public static final String DEL_ERROR = "0x006";
 	
-	
+	protected  FilenameFilter filter = new FilenameFilter(){
+        public boolean accept(File dir, String name) {
+            return !(name.startsWith(".") || name.endsWith(".java") || 
+                     name.endsWith(".class") || name.endsWith("ini")||
+                     name.endsWith(".xsd") || name.equals("makefile") ||
+                     name.endsWith(".xml") || name.equals("mySrvKeystore") ||
+                     new File(name).isDirectory()); } };
 	
 	/**
 	 * Tool to convert binary data to base64
@@ -41,7 +48,7 @@ public abstract class AbstractProtocol {
 	 */
 	public void backupDirectory(){
 		File file = new File(getProperty("user.dir"));
-		backupDir = file.list();
+		backupDir = file.list(filter);
 	}
 	
 	/**

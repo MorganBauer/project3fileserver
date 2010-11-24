@@ -9,6 +9,8 @@ import team3.src.exception.IllegalCommandException;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -184,18 +186,26 @@ public class AbstractClient {
     // TODO: WILL NEED TO DO SOME MODIFYING LATER
     protected static void getDirectory(String[] args) throws IllegalCommandException{
         final String format = "%1$-40s%2$-40s\n";
+        FilenameFilter filter = new FilenameFilter(){
+            public boolean accept(File dir, String name) {
+                return !(name.startsWith(".") || name.endsWith(".java") || 
+                         name.endsWith(".class") || name.endsWith("ini")||
+                         name.endsWith(".xsd") || name.equals("makefile") ||
+                         name.endsWith(".xml") || name.equals("mySrvKeystore") ||
+                         new File(name).isDirectory()); } };
         if(args.length != 3) throw new IllegalCommandException();
         try{
             final int start = Integer.parseInt(args[1]);
             int nmax = Integer.parseInt(args[2]);
             File file = new File(getProperty("user.dir"));
-            if(file.list().length < start || start < 0){
+            String[] list = file.list(filter);
+            if(list.length < start || start < 0){
                 out.println("Malformed command: invalid numerical constraints");
                 throw new IllegalCommandException();
             }
-            nmax = Math.min(nmax, file.list().length);
+            nmax = Math.min(nmax, list.length);
             for(int i = start; i < nmax; i=i+2){
-                out.format(format, file.list()[i], ((i + 1 < file.list().length) && (i+1 < nmax))?file.list()[i+1]:" ");
+                out.format(format, list[i], ((i + 1 < list.length) && (i+1 < nmax))?list[i+1]:" ");
             }
         }catch(NumberFormatException e){
             out.println("Malformed command: args 2 and 3 require numbers ");
@@ -266,17 +276,9 @@ public class AbstractClient {
          * @throws IOException if unable to read from in-stream buffer
          */
         protected AbstractResponse grabFromServer() throws IOException, JAXBException{
-            
-        	//try
         		String message = clientIn.readLine();
                 return AbstractResponse.unmarshal(message);
-  
-        	//catch (SocketException se)
-        	//{
-        		// server died
-        		// set server status to dead, reinit connection
-        		//initConnection();
-        	//}
+
         	
         }
         

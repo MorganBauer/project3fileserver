@@ -234,8 +234,7 @@ public final class ClientProtocol extends AbstractProtocol{
        try{
            String encoded = dataToMsgUtil.data2Base64(msg.read(), chunkNo++, chunkSize, true);
            if(encoded == null) return null;
-           out.println(encoded.length()/KILOBYTE);
-           out.println((((4/3)*encoded.length()/KILOBYTE) < chunkSize));
+           if((((4/3)*encoded.length()/KILOBYTE) < chunkSize)) dataToMsgUtil.cleanup();
            return messageFactory.createFilePutMessage(id, outfile, priority, java.net.URLEncoder.encode(encoded,"UTF-8"), chunkNo-1, chunkSize, ((4/3)*encoded.length()/KILOBYTE < chunkSize));
        }catch(FileNotFoundException e){
            out.println("Can't find file for transmitting");
@@ -288,7 +287,7 @@ public final class ClientProtocol extends AbstractProtocol{
                out.println("LAST!!");
                if(exists(infile)) delete(infile);
                if(rename(outfile)) return null;
-               else out.println("Corruption ERROR.");
+               else out.println("Unable to rename, using default filename.");
                return null;
            }
            return messageFactory.createFileGetMessage(id, infile, priority, ++chunkNo, chunkSize);
