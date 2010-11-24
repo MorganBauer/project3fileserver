@@ -7,6 +7,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Timer;
@@ -525,6 +526,26 @@ public class Server extends AbstractServer {
                 out.println(socket.toString());
                 try{ setStreams(socket.getClient());
                 }catch(IOException e){ /*TODO: Use that AbstractErrorHandler... catch this error */}
+                String event = socket.getMode().toString()+" Request ";
+                LogMessage log = LogMessage.buildLogEventMessage(getHostname(), port, event, Integer.toString(priorityPool.size()), socket.getCurrentMsg().getID());
+                try {
+					byte [] bytes = log.marshal().getBytes();
+					DatagramSocket Dsocket = new DatagramSocket();
+					Dsocket.send(new DatagramPacket(bytes,bytes.length,InetAddress.getByName(getLogHostname()),getLogPort()));
+				} catch (JAXBException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (SocketException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (UnknownHostException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+                
                 switch(socket.getMode()){
                 case READ:
                     work();
@@ -563,6 +584,25 @@ public class Server extends AbstractServer {
                     break;
                 default: throw new AssertionError(socket.getMode()); // WE SHOULDNT GET HERE... FAIL FAST...
                 }
+                event = socket.getMode().toString() +" Request Completed ";
+                log = LogMessage.buildLogEventMessage(getHostname(), port, event, Integer.toString(priorityPool.size()), socket.getCurrentMsg().getID());
+                try {
+					byte [] bytes = log.marshal().getBytes();
+					DatagramSocket Dsocket = new DatagramSocket();
+					Dsocket.send(new DatagramPacket(bytes,bytes.length,InetAddress.getByName(getLogHostname()),getLogPort()));
+				} catch (JAXBException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (SocketException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (UnknownHostException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
             }
             
             /**
