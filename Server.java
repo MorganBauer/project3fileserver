@@ -3,6 +3,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -18,6 +20,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.xml.bind.JAXBException;
 
 import team3.src.message.AbstractMessage;
+import team3.src.message.LogMessage;
 import team3.src.message.Message;
 import team3.src.message.ServerMessageFactory;
 import team3.src.message.client.AbstractClientMessage;
@@ -150,7 +153,7 @@ public class Server extends AbstractServer {
     protected static final class UpdatePulse{
         private static UpdatePulse pulsor;
         Timer timer;
-        TimerTask task = new TimerTask(){
+        TimerTask taskPulse = new TimerTask(){
             public void run(){
                for(ServerInfo server:servers){
                    try {
@@ -172,9 +175,27 @@ public class Server extends AbstractServer {
                }
             }
         };
+        TimerTask taskLog = new TimerTask(){
+            public void run(){
+                LogMessage log = LogMessage.buildLogStatusMessage(getHostname(), port, "STATUS", Integer.toString(priorityPool.size()));
+                try {
+                    byte[] bytes = log.marshal().getBytes();
+                    DatagramPacket packet = new DatagramPacket(bytes, bytes.length,InetAddress.getByName(getLogHostname()),getLogPort());
+                    DatagramSocket socket = new DatagramSocket();
+                    socket.send(packet);
+                } catch (JAXBException e) {
+                    e.printStackTrace();
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
         private UpdatePulse(){
             timer = new Timer();
-            timer.schedule(task, 10000, 5000);
+            timer.schedule(taskPulse, 10000, 5000);
+            timer.schedule(taskLog, 1000, 11000);
         }
         public static final UpdatePulse getPulsor(){
             return (pulsor != null)?pulsor:(pulsor = new UpdatePulse());
