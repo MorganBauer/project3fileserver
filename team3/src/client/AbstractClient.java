@@ -306,7 +306,7 @@ public class AbstractClient {
          * @throws NumberFormatException This means our config.ini file is corrupted
          */
         private int getPort(int server) throws NumberFormatException{
-            String host = "server-port"+server;//new String("server-port"+server);
+            final String host = "server-port"+server;//new String("server-port"+server);
             return Integer.parseInt(data.get(host));
         }
         
@@ -324,7 +324,7 @@ public class AbstractClient {
          * @return hostname the name of the host
          */
         private String getHost(int server){
-            String host = "server-hostname"+server;//new String("server-hostname"+server);
+            final String host = "server-hostname"+server;//new String("server-hostname"+server);
             return data.get(host);
         }
         
@@ -341,7 +341,7 @@ public class AbstractClient {
         protected void initConnection() throws UnknownHostException, IOException{
             //config data map has 2 entries per server and 1 for chunk size and 1 for client ID
             //maximum gives the max number of servers in config file
-            int maximum = ((data.getSize()/2)-1);
+            final int maximum = ((data.getSize()/2)-1);
             //int host;
             do{
             	hostNumber = (int)((Math.random()*maximum)+1);

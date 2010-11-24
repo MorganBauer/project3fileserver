@@ -41,6 +41,7 @@ public abstract class AbstractServer {
     
     /** Flag to check whether the server process is in a runnable state */
     private static volatile Boolean isRunning = true;
+    private static final Object isRunningLock = new Object();
     /** Server Listening object. */
     protected static SSLServerSocket socket;
     /** Port of this server */
@@ -128,14 +129,14 @@ public abstract class AbstractServer {
      * @return True if it is, false otherwise
      */
     protected static boolean isRunning(){
-        synchronized(isRunning){
+        synchronized(isRunningLock){
             return isRunning;
         }
     } 
     
     /** Sets our running flag to false, done to end server. */
     protected static void finished(){ 
-        synchronized(isRunning){
+        synchronized(isRunningLock){
             isRunning = false;
         }
     }
